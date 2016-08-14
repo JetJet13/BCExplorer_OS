@@ -1,0 +1,120 @@
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<h2>Network Status</h2>
+</div>
+<div data-ng-controller="StatusPageController" class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<div class="uk-width-large-4-10 uk-width-medium-1-1 uk-width-small-1-1">
+    <table id="statusOneTable" class="uk-width-1-1" rules="none">
+    	<tr class="tableHeader">
+    		<td colspan="2">Summary</td>
+    	</tr>
+    	<tbody>
+    	<tr class="tableRow">
+            <td>Height</td>
+            <td >{{status_data.blocks | number}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Shares Supply</td>
+            <td >{{status_data.moneysupply | number}} BKS</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Credits Supply</td>
+            <td >0 BKC</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Market Cap (BKS)</td>
+            <td>Not Available</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Market Price (BKS)</td>
+            <td >Not Available</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Market Cap (BKC)</td>
+        	<td>Not Available</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Market Price (BKC)</td>
+            <td >Not Available</td>
+        </tr>
+     	<tr class="tableRow">
+            <td>Connections</td>
+            <td>{{status_data.connections}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Network Version</td>
+            <td>{{status_data.version}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Protocol Version</td>
+            <td>{{status_data.protocolversion}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Difficulty (PoS)</td>
+            <td >{{status_data.difficulty}}</td>
+        </tr>
+            <tr class="tableRow">
+            <td>Difficulty (PoW)</td>
+            <td >0</td>
+        </tr>
+            <tr class="tableRow">
+            <td>Network Gh/s</td>
+            <td >0 Gh/s</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Proof -of- Stake Blocks</td>
+            <td >{{status_data.blocks -  401 | number}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Proof -of- Work Blocks</td>
+            <td >401</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Total Num. Trans.</td>
+            <td >{{status_data.total_tx | number}}</td>
+        </tr>
+    	</tbody>
+    </table>
+</div>
+<div class="uk-width-large-5-10 uk-width-medium-1-1 uk-width-small-1-1">
+    <table id="statusTwoTable" class="uk-width-1-1" rules="none">
+    	<tr class="tableHeader">
+    		<td colspan="2">Details (Past 24 hours)</td>
+    	</tr>
+    	<tbody>
+    	<tr class="tableRow">
+        	<td>Num. Blocks</td>
+        	<td >{{data.num_blocks}}</td>
+    	</tr>
+    	<tr class="tableRow">
+        	<td>Total Transacted (BKC)</td>
+        	<td>{{data.tx_received_bkc/10000 | number}} BKC</td>        
+    	</tr>
+        <tr class="tableRow">
+            <td>Market Total Transacted (BKC)</td>
+            <td>Not Available</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Total Transacted (BKS)</td>
+            <td>{{data.tx_received_bks/10000 | number}} BKS</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Market Total Transacted (BKS)</td>
+            <td>Not Available</td>        
+        </tr>
+        <tr class="tableRow">
+            <td>Num. Trans.</td>
+            <td>{{data.num_tx}}</td>
+        </tr>
+        <tr class="tableRow">
+            <td>Avg. Time Between Blocks</td>
+            <td>???</td>
+        </tr>
+    	</tbody>
+    </table>
+    <div class="uk-panel uk-panel-header uk-panel-box uk-text-center uk-margin-top">
+    <h5 class="uk-panel-title">Other Links</h5>    
+    <a data-ng-href="/status/richListBKS" style="font-size: 10pt;">Wealthiest BlockShares Addresses</a>
+    </div>
+</div>
+    
+</div>

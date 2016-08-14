@@ -1,0 +1,30 @@
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<h2 id="allBlocks">All Blocks</h2>
+</div>
+<div class="chevron_up" scroll-to-item scroll-to=".allTable">
+<i class="uk-icon-angle-up uk-icon-large"></i>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<table class="allTable uk-width-1-1" rules="none" data-ng-controller="AllBlocksController" infinite-scroll="moreblocks(nxt_page,block_count)" infinite-scroll-disabled="isBusy">
+    <tr id="label">
+        <td>Height</td> 
+        <td>Age</td> 
+        <td class="uk-hidden-small">Size (KB)</td>         
+        <td>Num. Tx.</td> 
+        <td class="uk-visible-large">Solved by</td> 
+        <td class="uk-visible-large">Total Out (BKS)</td>        
+        <td class="uk-visible-large">Total Out (BKC)</td>
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveRow animated fadeInDown" data-ng-repeat="block in block_list">
+            <td><a data-ng-click="goNav(block.height,'block')">{{block.height | number}}</a></td>
+            <td>{{block.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}</td>
+            <td class="uk-hidden-small">{{block.size}}</td>
+            <td>{{block.numtx}}</td>
+            <td class="uk-visible-large"><a data-ng-click="goNav(block.solvedby,'address')">{{block.solvedby}}</a></td> 
+            <td class="uk-visible-large">{{block.tx_received_bks/10000 | number}} BKS</td> 
+            <td class="uk-visible-large">{{block.tx_received_bkc/10000 | number}} BKC</td>
+        </tr>
+    </tbody>
+</table>
+</div>

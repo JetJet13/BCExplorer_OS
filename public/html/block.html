@@ -1,0 +1,259 @@
+<div data-ng-controller="BlockController" class="uk-width-1-1 uk-container-center">
+<div class="uk-grid uk-width-9-10  uk-margin-large-top uk-container-center">
+<h2><i class="fa fa-cubes"></i> Block #{{block_data.height | number}}</h2>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center">
+	<div class="uk-width-large-4-10 uk-width-medium-1-1">
+	<table class="blockDetailTable uk-width-1-1" rules="none">
+		<tr class="tableHeader"><td colspan="2">Summary</td></tr>
+		<tr class="blockDetail">
+			<td>Height</td>
+			<td>{{block_data.height | number}}</td>
+		</tr>
+	    <tr class="blockDetail">
+			<td>Confirmations</td>
+			<td>{{block_data.conf | number}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Num. Tx.</td>
+			<td>{{block_data.numtx | number}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Age</td>
+			<td>{{block_data.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Size</td>
+			<td>{{block_data.size | number}} KB</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Bits</td>
+			<td>{{block_data.bits}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Difficulty</td>
+			<td>{{block_data.difficulty | number}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Nonce</td>
+			<td>{{block_data.nonce}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Type</td>
+			<td>{{block_data.type}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Version</td>
+			<td>{{block_data.ver}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Chain</td>
+			<td>{{block_data.chain}}</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Total Transacted (BKS)</td>
+			<td>{{block_data.tx_received_bks/10000 | number}} BKS</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Total Transacted (BKC)</td>
+			<td>{{block_data.tx_received_bkc/10000 | number}} BKC</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Solved by</td>
+			<td>
+				<a data-ng-click="goNav(block_data.solvedby,'address')">
+					<span class="uk-hidden-small">{{block_data.solvedby}}</span>
+					
+					<span class="uk-visible-small">{{block_data.solvedby.substring(0,4)}}...</span>
+				</a>
+			</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Reward</td>
+			<td>{{block_data.mint | number}} BKS</td>
+		</tr>
+	    <tr class="blockDetail">
+			<td>Coinage Destroyed</td>
+			<td>{{block_data.coinagedestroyed | number}}</td>
+		</tr>
+	</table>
+	</div>
+	<div class="uk-width-large-6-10 uk-width-medium-1-1 uk-width-small-1-1">
+	<table class="blockHashTable uk-width-1-1" rules="none">
+		<tr class="tableHeader"><td colspan="2">Hash Summary</td><td> </td> </tr>
+		<tr class="blockDetail">
+			<td>Hash</td>
+			<td>
+				<span class="uk-visible-large">{{block_data.id}}</span>
+				<span class="uk-visible-medium">{{block_data.id.substring(0,30)}}...</span>
+				<span class="uk-visible-small">{{block_data.id.substring(0,12)}}...</span>
+			</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Prev. Hash</td>
+			<td>
+				<a data-ng-click="goNav(block_data.prevhash,'block')">
+				<span class="uk-visible-large">{{block_data.prevhash}}</span>
+				<span class="uk-visible-medium">{{block_data.prevhash.substring(0,30)}}...</span>
+				<span class="uk-visible-small">{{block_data.prevhash.substring(0,12)}}...</span>
+				</a>
+			</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Next Hash</td>
+			<td>
+				<a data-ng-click="goNav(block_data.nexthash,'block')">
+					<span class="uk-visible-large">{{block_data.nexthash}}</span>
+					<span class="uk-visible-medium">{{block_data.nexthash.substring(0,30)}}...</span>
+					<span class="uk-visible-small">{{block_data.nexthash.substring(0,12)}}...</span>
+				</a>
+			</td>
+		</tr>
+		<tr class="blockDetail">
+			<td>Merkle Root</td>
+			<td>
+				<span class="uk-visible-large">{{block_data.merkleroot}}</span>
+				<span class="uk-visible-medium">{{block_data.merkleroot.substring(0,30)}}...</span>
+				<span class="uk-visible-small">{{block_data.merkleroot.substring(0,12)}}...</span>
+			</td>
+		</tr>
+	</table>
+	</div>
+ </div>
+
+<div class="uk-grid uk-grid-width-large-1-3 uk-grid-width-medium-1-1 uk-grid-width-small-1-1 uk-width-9-10 uk-container-center">
+	<div data-ng-if="detail === 'ext'">
+		<table id="feesTable" rules="none">
+			<tr class="tableHeader">
+				<td colspan="2">Fees</td>
+			</tr>
+			<tr data-ng-if="block_data.vote.fees.C === undefined">
+				<td>None</td>
+			</tr>
+			<tbody data-ng-if="block_data.vote.fees.C !== undefined">
+				<tr class="blockDetail">
+					<td>Shares</td>
+					<td>{{block_data.vote.fees['8']}}</td>
+				</tr>
+				<tr class="blockDetail">
+					<td>Credits</td>
+					<td>{{block_data.vote.fees.C}}</td>
+				</tr>
+			</tbody>    
+		</table>
+	</div>
+<div data-ng-if="detail === 'ext'">
+	<table id="motionsTable" rules="none">
+		<tr class="tableHeader">
+			<td colspan="2">Motions</td>
+		</tr>
+		<tr data-ng-if="block_data.vote.motions.length === 0" class="blockDetail">
+			<td colspan="2">No Motion Votes</td>
+		</tr>
+		<tr class="blockDetail" data-ng-repeat="motion in block_data.vote.motions">
+			<td>
+				<span class="uk-visible-large">{{motion}}</span>
+				<span class="uk-visible-medium">{{motion.substring(0,8)}}...</span>
+				<span class="uk-visible-small">{{motion.substring(0,4)}}...</span>
+			</td>
+		</tr>
+	</table>
+</div>
+<div data-ng-if="detail === 'ext'">
+	<table id="custoTable" rules="none">
+		<tr class="tableHeader">
+			<td colspan="2">Custodians</td>
+		</tr>
+		<tr data-ng-if="block_data.vote.custodians.length === 0" class="blockDetail">
+			<td colspan="2">No Custodian Votes</td>
+		</tr>
+		<tr class="blockDetail" data-ng-repeat="custo in block_data.vote.custodians">
+			<td>
+				<span class="uk-visible-large">{{custo.address}}</span>
+				<span class="uk-visible-medium">{{custo.address.substring(0,8)}}...</span>
+				<span class="uk-visible-small">{{custo.address.substring(0,4)}}...</span>
+			</td>
+			<td class="uk-visible-large">{{custo.amount | number}} BKC</td>
+		</tr>
+	</table>
+</div>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center">
+	<div class="uk-width-1-2">
+	<h2>Transactions</h2>
+	</div>
+	<div class="uk-width-1-2">
+	<button class="exDetail  uk-float-right" data-ng-if="detail === 'reg'" data-ng-click="toggle()"><i class="fa fa-toggle-off fa-2x"></i></button>
+    <button class="reDetail  uk-float-right" data-ng-if="detail === 'ext'" data-ng-click="toggle()"><i class="fa fa-toggle-on fa-2x"></i></button>
+    <span class='showLinks uk-float-right'>show spent</span>
+    </div>
+</div>
+<br>
+<div class="chevron_up" scroll-to-item scroll-to="#BlockNum"><i class="uk-icon-angle-up uk-icon-large"></i></div>
+<div class="uk-grid uk-width-9-10 uk-container-center" infinite-scroll="moretxs(block_data.id, nxt_page, block_data.numtx)" infinite-scroll-disabled="isBusy">
+	<div class="uk-panel uk-panel-header uk-panel-divider uk-panel-box uk-width-1-1 uk-align-center" data-ng-repeat="tx in tx_data">
+		<h3 class="uk-panel-title" style="font-size: 11pt;">
+			<a data-ng-click="goNav(tx.id,'tx')">
+				<span class="uk-visible-large">{{tx.id}}</span>
+				<span class="uk-visible-medium">{{tx.id}}</span>
+				<span class="uk-visible-small">{{tx.id.substring(0,20)}}...</span>
+			</a>
+			<span class="txHashSpan uk-hidden-small uk-hidden-medium">
+				{{tx.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}
+			</span>			
+		</h3>
+		<table class="uk-width-1-1" rules="none">
+		<tbody class="txBody">
+		<tr class="tx">
+			<td class="txDetail">
+				<li data-ng-repeat="inp in tx.inputs">
+                    <a data-ng-href="/transactions/{{inp.in_tx}}"><span class="hand-o-left"><i class="fa fa-hand-o-left" data-ng-if="inp.address !== 'Coinbase' && detail === 'ext'"></i></span></a>
+                    <a data-ng-if="inp.address !== 'Coinbase'" data-ng-click="goNav(inp.address,'address')">
+                    	<span class="uk-visible-large">{{inp.address}}</span>
+                    	<span class="uk-visible-medium">{{inp.address.substring(0,8)}}...</span>
+                    	<span class="uk-visible-small">{{inp.address.substring(0,4)}}...</span>
+                    </a>
+                    <span data-ng-if="inp.address === 'Coinbase'" class="emptyAddress">{{inp.address}}</span>
+                </li>
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="inp in tx.inputs">{{inp.in_val/10000 | number}} BKS</li>
+			</td>
+			<td class="txDetail">
+				<!-- <img src="/images/bluechevron.png"> -->
+				<i class="uk-icon-chevron-right uk-icon-medium" style="color:#004d40;"></i>
+
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="out in tx.outputs">
+                    <a data-ng-if="out.address !== 'None' && out.address !== 'NonStandard'" data-ng-click="goNav(out.address,'address')"> 
+						<span class="uk-visible-large">{{out.address}}</span>
+                    	<span class="uk-visible-medium">{{out.address.substring(0,8)}}...</span>
+                    	<span class="uk-visible-small">{{out.address.substring(0,4)}}...</span>
+                    </a>
+                    <span data-ng-if="out.address === 'None' || out.address === 'NonStandard'" class="emptyAddress">{{out.address}}</span>
+                    <a data-ng-href="/transactions/{{tx.out_txs[out.out_num]}}">
+                    	<span class="hand-o-right">
+                    	<i class="fa fa-hand-o-right" data-ng-if="out.address !== 'None' && out.address !== 'NonStandard' && detail === 'ext' && tx.out_txs[out.out_num] !== 'unspent'"></i>
+                    	</span>
+                    </a> 
+                </li>
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="out in tx.outputs">{{out.out_val/10000 | number}} BKS</li>	
+			</td>
+			<td class="uk-visible-large">
+				<button class="outAmount uk-button-third" data-ng-click="toggleCurrency(currency)">{{tx.out_total/10000 | number}} BKS</button>
+                <button class="SDD uk-button-secondary" data-ng-if="tx.coinstake === true">{{tx.coinagedestroyed | number}} SDD</button>
+				<button class="confBlue" data-ng-if="block_data.conf <=9">{{block_data.conf}} Confirmations</button>
+			</td>
+		</tr>
+	</tbody>
+	</table>
+	<div class="uk-width-1-1 uk-hidden-large uk-text-center">
+				<button class="uk-button uk-button-third" data-ng-click="toggleCurrency(currency)">{{tx.out_total/10000 | number}} BKS</button>
+                <button class="uk-button uk-button-secondary" data-ng-if="tx.coinstake === true">{{tx.coinagedestroyed | number}} SDD</button>
+				<button class="uk-button uk-button-primary" data-ng-if="block_data.conf <=9">{{block_data.conf}} Confirmations</button>
+	</div>	
+	</div>
+</div>

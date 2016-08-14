@@ -1,0 +1,39 @@
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top">
+<h2>Successful Motions</h2>
+</div>
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top">
+    <a data-ng-href="/motions">
+        <button class="motionsPassed uk-button-third">
+            Motions in Progress
+        </button>
+    </a>
+</div>
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top tableMinHeight">
+    <table class="motionTable uk-width-1-1" rules="none" data-ng-controller="MotionSuccessController">
+        <tr id="label">
+            <td>Hash</td> 
+            <td>Num. Votes</td> 
+            <td class="uk-hidden-small">Granted</td>           
+        </tr>
+        <tbody class="liveBlocks">
+            <tr class="liveRow animated fadeInDown" data-ng-if="data.length === 0"><td colspan="6">No Successful Motions</td></tr>
+            <tr class="liveRow animated fadeInDown" data-ng-repeat="mot in data">
+            <td class="uk-visible-large">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id}}</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-medium">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id.substring(0,8)}}...</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-small">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id.substring(0,4)}}...</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+                <td>{{mot.numvotes | number}}</td>
+                <td class="uk-hidden-small"><a data-ng-click="goNav(mot.passedblock,'block')">{{mot.passedblock | number}}</a></td> 
+                       
+            </tr>
+        </tbody>
+    </table>
+</div>

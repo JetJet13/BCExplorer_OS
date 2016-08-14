@@ -1,0 +1,12 @@
+h4{
+	margin:0 auto;
+	font-family: "DINPro";
+}
+a{
+	text-decoration: none;
+	font-family: "DINPro";
+	color:#03a9f4;
+}
+a:hover{
+	color:#01579b;
+}

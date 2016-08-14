@@ -1,0 +1,26 @@
+#chartsHeader{
+    margin-left: 5%;
+}
+.chartBtn{
+    border-style: solid;
+	border-width: 1px;
+	border-color: #43B985;
+	color: #43B985;
+	border-radius: 2px;
+	background: none;
+	font-style: DINPro;
+	height: 36px;
+    cursor: pointer;
+    
+}
+.btnDiv{
+
+}
+#notice{
+    color: grey;
+    font-size: 70%;
+
+}
+.chart{
+
+}

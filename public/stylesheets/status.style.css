@@ -1,0 +1,27 @@
+#statusHeader{
+/*	margin-left: 12%;*/
+}
+#statusOneTable{
+/*	margin-left: 12%;
+	width: 40%;
+	float: left;*/
+	font-size: 10pt;
+/*	margin-bottom: 10%;*/
+}
+#statusTwoTable{
+/*	margin-left: -1px;
+	width: 40%;
+	float: left;*/
+	font-size: 10pt;
+}
+.otherLinks{
+	/*float: left;
+	margin-left: 10px;
+	margin-top: 10px;*/
+	font-size: 10pt;
+	/*width: 38%;
+	border: 0px solid #B5B5B5;
+	border-radius: 3px;
+	text-align: center;*/
+
+}

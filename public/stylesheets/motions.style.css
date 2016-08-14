@@ -1,0 +1,45 @@
+
+#motionHeader{
+	margin-left: 5%;
+}
+
+.motionTable{
+	/*width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;*/
+	font-size: 10pt;
+    /*margin-bottom: 150px;*/
+
+}
+.tableMinHeight{
+	min-height: 300px;
+}
+#label{
+	background: none;
+	border-color: #2C4055;
+	color: #2C4055;
+	height: 36px;
+	text-align: center;
+    font-weight: bold;
+}
+.liveRow{
+	border-color: #D8D8D8;
+	text-align: center;
+	height: 36px;
+}
+.aMotionsPassed{
+    float: right;
+    
+}
+.motionsPassed{
+    border-style: solid;
+	border-width: 1px;
+	border-color: #43B985;
+	color: #43B985;
+	border-radius: 2px;
+	background: none;
+	font-style: DINPro;
+	height: 36px;
+	width: 164px;
+    cursor: pointer;
+}

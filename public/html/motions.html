@@ -1,0 +1,55 @@
+<div class="uk-width-1-1 uk-height-1-1">
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<h2>Motions in Progress</h2>
+</h2>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+    <a data-ng-href="/motions_passed">
+        <button class="motionsPassed uk-button-third">
+            Successful Motions 
+        </button>
+    </a>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top tableMinHeight">
+<table class="motionTable uk-width-1-1" rules="none" data-ng-controller="MotionController as vm">
+    <tr id="label">
+        <td>Hash</td> 
+        <td class="uk-hidden-medium uk-hidden-small">Last 100 Blocks</td> 
+        <td class="uk-hidden-medium uk-hidden-small">Latest Vote</td>          
+        <td>Num. Votes</td> 
+        <td>SDD(Vote/Total)</td>        
+        
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveRow animated fadeInDown" data-ng-if="vm.data.length === 0"><td colspan="6">No Motions in Progress</td></tr>
+        <tr class="liveRow animated fadeInDown" data-ng-repeat="mot in vm.data">
+            <td class="uk-visible-large">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id}}</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-medium">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id.substring(0,8)}}...</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-small">
+                <a data-ng-href="/votedfor/motion/{{mot.id}}/1">{{mot.id.substring(0,4)}}...</a>
+                <a data-ng-if="mot.url !== '?'" data-ng-href="mot.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-hidden-medium uk-hidden-small">{{mot.last_100 | number}} votes</td>
+            <td class="uk-hidden-medium uk-hidden-small"><a data-ng-href="/blocks/{{mot.latest_block}}/1">{{mot.latest_vote | number}}</a> <span style="color:gray"> blocks ago</span></td>
+            <td><span data-ng-if="mot.last_100 > 5" style="color:green"><i class="fa fa-arrow-circle-up"></i></span>
+                <span data-ng-if="mot.last_100 <=5 && mot.last_100 > 0 " style="color:amber"><i class="fa fa-arrow-circle-up"></i></span>
+                <span data-ng-if="mot.last_100 <= 0 && mot.latest_vote < 10000" style="color:red"><i class="fa fa-arrow-circle-down"></i></span>
+                <span data-ng-if="mot.latest_vote < 10000 && mot.numvotes >= 1">{{mot.numvotes | number}}</span>
+                <span data-ng-if="mot.latest_vote > 10000">0</span>
+                <span data-ng-if="(mot.numvotes/10000)*100 > 50" style="color:green"><i class="fa fa-check"></i></span>
+            </td>
+            <td>{{mot.sdd | number}} / {{mot.total_sdd | number}} <span class="uk-hidden-small uk-hidden-medium" style="color:grey"> ({{mot.sdd/mot.total_sdd | number:2}} %)</span>
+                <span data-ng-if="(mot.sdd/mot.total_sdd)*100 > 50" style="color:green"><i class="fa fa-check"></i></span>
+            </td> 
+                   
+        </tr>
+    </tbody>
+</table>
+</div>
+</div>

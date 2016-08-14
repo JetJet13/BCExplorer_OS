@@ -1,0 +1,31 @@
+{
+  "name": "BCExplorer_OS",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bitcoin": ">=2.4.0",
+    "body-parser": ">=1.0.0",
+    "compression": ">=1.6.1",
+    "cookie-parser": "^1.4.3",
+    "debug": "^2.2.0",
+    "express": ">=4.2.0",
+    "express-winston": "^2.0.0",
+    "fs": "0.0.2",
+    "grunt": "^1.0.1",
+    "grunt-contrib-sass": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-express-server": ">=0.5.2",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "morgan": "^1.7.0",
+    "pg": "^6.1.0",
+    "pug": ">=2.0.0-beta5",
+    "sass-material-colors": "0.0.5",
+    "serve-favicon": "^2.3.0",
+    "winston": "^2.2.0",
+    "ws": "^1.1.1"
+  }
+}

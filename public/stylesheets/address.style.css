@@ -1,0 +1,24 @@
+#addrHeader{
+/*	float: left;
+	margin-left: 5%;
+	height: 36px;*/
+}
+.addrDetailTable{
+/*	float: left;
+	clear: both;
+	margin-left: 5%;
+	width: 35%;*/
+	font-size: 10pt;
+	
+}
+.addrDet{
+	height: 36px;
+	border-color: #D8D8D8;
+}
+
+.addrSummaryTable{
+/*	float: left;
+	margin-left: -1px;
+	width: 35%;*/
+	font-size: 10pt;
+}

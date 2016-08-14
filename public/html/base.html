@@ -1,0 +1,158 @@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.25.0/js/components/sticky.min.js"></script>
+    <!-- <img id="Logo"src="/images/bclogov6.png"> -->
+    <nav class="uk-navbar uk-navbar-attached uk-width-1-1" data-uk-sticky="">
+    <a class="uk-navbar-brand" style="font-weight: bold;" data-ng-click="goHome()"><img src="/images/small-bclogov6.png" />B&C Explorer</a>
+    <ul class="uk-navbar-nav uk-hidden-small uk-hidden-medium" data-ng-controller="NavigateController">
+        <li><a data-ng-click="nav()" data-ng-href="/">Home</a></li>
+        <li><a data-ng-click="nav()" data-ng-href="/status">Status</a></li>
+        <li><a data-ng-href="/charts/size">Charts</a></li>
+        <li><a href="nav()" data-ng-href="/motions">Motions</a></li>
+        <li><a href="nav()" data-ng-href="/custodians">Votes</a></li>
+        <li><a href="nav()" data-ng-href="/apis">API</a></li>
+    </ul>
+    <ul class="uk-navbar-nav uk-navbar-flip uk-margin-small-right uk-hidden-small uk-hidden-medium" data-ng-controller="StatusController">
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                Conn. 
+                <div class="uk-text-center">{{ws.status_list.connections}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                Height 
+                <div class="uk-text-center">{{ws.status_list.height | number}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                BKS Supply 
+                <div class="uk-text-center">~ {{ws.status_list.moneysupply | number}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                BKC Supply 
+                <div class="uk-text-center">~ 0</div>
+            </a>
+        </li>           
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                BKS Price 
+                <div class="uk-text-center">NA</div>
+            </a>
+        </li>           
+        <li>
+            <a class="uk-navbar-nav-subtitle">
+                BKC Price 
+                <div class="uk-text-center">NA</div>
+            </a>
+        </li>
+    </ul>
+    <ul class="uk-navbar-nav uk-navbar-flip uk-hidden-large uk-contrast">
+    <li><a class="" data-ng-click="goBack()">
+        <i class="uk-icon-chevron-left"></i> Back
+    </a></li>
+    <li>
+    <a class="" data-uk-offcanvas="{target:'#my-id'}">
+        <i class="uk-icon-navicon uk-icon-small"></i>
+    </a>
+    </li>
+
+    </ul>
+    <div class="uk-navbar-content uk-navbar-center uk-hidden-small" data-ng-controller="QueryController">
+    <form class="uk-search" data-ng-submit="go(search.id)">
+    <div class="uk-form-icon-flip uk-form-icon">    
+    <input  class="uk-search-field" 
+            type="search" 
+            placeholder="search" 
+            data-ng-model="search.id"
+            >
+        <i class="uk-icon-close" style="color:#ff8a80;" data-ng-show="error"></i>
+    </div>
+    </form>
+    </div>
+    </nav>
+<div id="my-id" class="uk-offcanvas">
+    <div class="uk-offcanvas-bar">
+        
+        <ul class="uk-nav uk-nav-offcanvas" data-uk-nav data-ng-controller="StatusController">
+        <li class="uk-nav-header uk-visible-small">Search</li>
+        <form class="uk-search uk-visible-small" data-ng-controller="QueryController" data-ng-submit="go(search.id)">    
+    <input  class="uk-search-field" 
+            type="search" 
+            placeholder="search" 
+            data-ng-model="search.id"
+            >
+        <i class="uk-icon-close" style="color:#ff8a80;" data-ng-show="error"></i>
+
+    </form>
+        <li class="uk-nav-header">Menu</li>
+        <li><a data-ng-click="nav()" data-ng-href="/">Home</a></li>
+        <li><a data-ng-click="nav()" data-ng-href="/status">Status</a></li>
+        <li><a data-ng-href="/charts/size">Charts</a></li>
+        <li><a href="nav()" data-ng-href="/motions">Motions</a></li>
+        <li><a href="nav()" data-ng-href="/custodians">Votes</a></li>
+        <li><a href="nav()" data-ng-href="/apis">API</a></li>
+        <li class="uk-nav-header">Status</li>
+        <li><a>Conn.  {{ws.status_list.connections}}</a></li>
+        <li><a>Height  {{ws.status_list.height | number}}</a></li>
+        <li><a>BKS Supply ~ {{ws.status_list.moneysupply | number}}</a></li>
+        <li><a>BKC Supply ~ 0</a></li>           
+        <li><a>BKS Price NA</a></li>          
+        <li><a>BKC Price NA</a></li>
+        </ul>
+    </div>
+</div>
+<!--
+<div  id="messageLabel" data-ng-show="error === false">
+<i class="fa fa-exclamation-triangle"></i>
+ BCExplorer is currently undergoing light maintenance.
+</div>
+-->
+
+<div class="uk-container uk-container-center uk-margin-top" data-ng-view>
+<!-- ng-view -->
+<!-- ng-view -->
+</div>
+<div class="uk-margin-large-top uk-block uk-contrast uk-width-1-1 uk-block-secondary uk-text-center uk-position-bottom uk-position-relative">
+<div class="uk-contrast uk-hidden-small">Powered by
+<hr class="uk-width-1-2 uk-align-center uk-hidden-small"/>
+</div>
+    <ul class="uk-subnav uk-subnav-line uk-flex uk-flex-center uk-hidden-small">
+        <li>
+            <a href="https://bitcointalk.org/index.php?topic=1033773.0">
+                <img src="/images/bcexchange.png">
+            </a>
+        </li>
+        <li>
+            <a href="https://nodejs.org/">
+                <img src="/images/nodejs.png">
+            </a>
+        </li>
+        <li>
+            <a href="https://angularjs.org/">
+                <img src="/images/angularjs.png">
+            </a>
+        </li>
+        <li>
+            <a href="http://www.postgresql.org/">
+                <img src="/images/postgresql.png">
+            </a>
+        </li>
+        <li>
+            <a href="http://expressjs.com/">
+                <img src="/images/expressjs.png">
+            </a>
+        </li>
+    </ul>
+    <div class="uk-contrast">
+    created and maintained by: Johny Georges
+    <br>
+    for contact: jgeorges371@gmail.com
+    </div>
+</div>
+
+	
+
+
+

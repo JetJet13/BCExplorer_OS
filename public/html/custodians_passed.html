@@ -1,0 +1,40 @@
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top">
+    <h2>Successful Grants</h2>
+</div>
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top">
+    <a class="aMotionsPassed" data-ng-href="/custodians">
+        <button class="motionsPassed uk-button-third">
+            Grants in Progress
+        </button>
+    </a>
+</div>
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top tableMinHeight">
+    <table class="motionTable uk-width-1-1" rules="none" data-ng-controller="CustodianSuccessController">
+        <tr id="label">
+            <td>Address</td>
+            <td>Amount</td> 
+            <td>Num. Votes</td> 
+            <td class="uk-visible-large">Granted</td>           
+        </tr>
+        <tbody class="liveBlocks">
+            <tr class="liveRow animated fadeInDown" data-ng-if="data.length === 0"><td colspan="6">No Successful Grants</td></tr>
+            <tr class="liveRow animated fadeInDown" data-ng-repeat="custo in data">
+            <td class="uk-visible-large">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address}}</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-medium">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address.substring(0,8)}}...</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-small">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address.substring(0,4)}}...</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+                <td>{{custo.amount/10000 | number}} BKC</td>
+                <td>{{custo.numvotes | number}}</td>
+                <td class="uk-visible-large"><a data-ng-click="goNav(custo.passedblock,'block')">{{custo.passedblock | number}}</a></td> 
+            </tr>
+        </tbody>
+    </table>
+</div>

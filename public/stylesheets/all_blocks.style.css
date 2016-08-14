@@ -1,0 +1,21 @@
+
+.allTable{
+/*	width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;
+        margin-bottom: 150px;*/
+	font-size: 10pt;
+
+}
+#label{
+	background: none;
+    border-width: 0px;
+	border-color: #2C4055;
+	color: #2C4055;
+    font-weight: bold;
+	height: 36px;
+	text-align: center;
+}
+
+
+

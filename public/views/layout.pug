@@ -1,0 +1,58 @@
+doctype html
+html
+  head
+    meta(name="google-site-verification" content="Zn99q2vAP6ShtAgzFfeEO7ovvex1bfmZRIaRfYovmyU")
+    title
+      | B&amp;C Explorer
+    meta(name='description', content='B&C Exchange Block Explorer. Query for blocks, transactions, and addresses found in the B&C Exchange network.')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    link(href='https://fonts.googleapis.com/css?family=Istok+Web:400,700|DINPro:400,600,900|Arimo:400,700' rel='stylesheet' type='text/css')
+    link(rel="stylesheet" href="/stylesheets/uikit.accordion.css")
+    link(rel="stylesheet" href="/stylesheets/font-awesome/css/font-awesome.min.css")
+    link(rel="stylesheet" href="/stylesheets/animate.min.css")
+    link(rel="icon" href="/images/favicon.ico")
+    link(rel='stylesheet', href='/stylesheets/toggle-switch.css')
+    link(rel='stylesheet', href='/stylesheets/base.style.css')
+    link(rel='stylesheet', href='/stylesheets/home.style.css')
+    link(rel='stylesheet', href='/stylesheets/block.style.css')
+    link(rel='stylesheet', href='/stylesheets/all_blocks.style.css')
+    link(rel='stylesheet', href='/stylesheets/trans.style.css')
+    link(rel='stylesheet', href='/stylesheets/address.style.css')
+    link(rel='stylesheet', href='/stylesheets/status.style.css')
+    link(rel='stylesheet', href='/stylesheets/motions.style.css')
+    link(rel='stylesheet', href='/stylesheets/charts.style.css')
+    link(rel='stylesheet', href='/stylesheets/loading-bar.css')
+    link(rel='stylesheet', href='/stylesheets/uikit.css')
+    script(type="text/javascript", src="/javascripts/jquery-2.1.4.min.js")
+    script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.25.0/js/uikit.min.js")
+    script(type="text/javascript", src="/javascripts/angular.min.js") 
+    script(type="text/javascript", src="/javascripts/angular-websocket.min.js")
+    script(type="text/javascript", src="/javascripts/angular-1.4.3-route.min.js")
+    script(type="text/javascript", src="/javascripts/highcharts.js")
+    script(type="text/javascript", src="/javascripts/google.js")
+    script(type='text/javascript', src='/javascripts/ng-infinite-scroll.min.js')
+    script(type='text/javascript', src='/javascripts/angular-timeAgo.js')
+    script(type='text/javascript', src='/javascripts/qrcode.js')
+    script(type='text/javascript', src='/javascripts/highcharts-ng.js')
+    script(type='text/javascript', src='/javascripts/angular-qrcode.js')
+    script(type='text/javascript', src='/javascripts/loading-bar.js')
+    script(type='text/javascript', src='/javascripts/core.js')
+    script(type='text/javascript', src='/javascripts/factories/apiFactory.js')
+    script(type='text/javascript', src='/javascripts/factories/wsFactory.js')
+    script(type='text/javascript', src='/javascripts/controllers/blockController.js')
+    script(type='text/javascript', src='/javascripts/controllers/navController.js')
+    script(type='text/javascript', src='/javascripts/controllers/transController.js')
+    script(type='text/javascript', src='/javascripts/controllers/addressController.js')
+    script(type='text/javascript', src='/javascripts/controllers/statusController.js')
+    script(type='text/javascript', src='/javascripts/controllers/voteController.js')
+    script(type='text/javascript', src='/javascripts/controllers/chartController.js')
+    script(type='text/javascript', src='/javascripts/controllers/apiController.js')
+    base(href="/") 
+  body(data-ng-app="BCE" class="uk-height-viewport")
+    include ../html/base.html
+    //script.
+      // LiveReload Updates: Need to find a way to remove this for production
+      document.write('<script src="http://'
+      + (location.host || 'localhost').split(':')[0]
+      + ':35729/livereload.js?snipver=1"></'
+      + 'script>')

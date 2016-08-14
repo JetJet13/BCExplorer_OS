@@ -1,0 +1,591 @@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.25.0/js/core/nav.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.25.0/js/components/sticky.min.js"></script>
+
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top">
+  <h2>API</h2>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top" data-ng-controller="APIController as vm">
+  <div class="uk-panel uk-width-1-4 uk-panel-box uk-hidden-small uk-hidden-medium">
+    <ul class="uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="" data-uk-sticky="{boundary: true,top:50}">
+
+      <li class="uk-parent">
+        <a href="#">Blocks</a>
+        <ul class="uk-nav-sub">
+          <li><a  scroll-to-item offset=40 scroll-to="#singleblock">Single Block</a></li>
+          <li><a  scroll-to-item offset=40 scroll-to="#latestblocks">Latest Blocks</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#blocktx" >Block Transactions</a></li>
+        </ul>
+      </li>
+      <li class="uk-parent">
+        <a href="#">Transactions</a>
+        <ul class="uk-nav-sub">
+          <li><a scroll-to-item offset=40 scroll-to="#singletx" >Single Transaction</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#sendrawtx">Send Raw Transaction</a></li>
+        </ul>
+      </li>
+      <li class="uk-parent">
+        <a href="#">Addresses</a>
+        <ul class="uk-nav-sub">
+          <li><a scroll-to-item offset=40 scroll-to="#addressinfo" >Address Info</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#addresstx" >Address Transactions</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#unspent" >Address Unspent Outputs</a></li>
+        </ul>
+      </li>
+      <li class="uk-parent">
+        <a href="#">Motions</a>
+        <ul class="uk-nav-sub">
+          <li><a scroll-to-item offset=40 scroll-to="#singlemotion" >Single Motion</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#allmotions" >All Motions in Progress</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#allsuccessmotions" >All Successful Motions</a></li>
+        </ul>
+      </li>
+      <li class="uk-parent">
+        <a href="#">Custodians</a>
+        <ul class="uk-nav-sub">
+          <li><a scroll-to-item offset=40 scroll-to="#singlecusto" >Single Custodian</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#allcusto" >All Custodians in Progress</a></li>
+          <li><a scroll-to-item offset=40 scroll-to="#allsuccesscusto" >All Successful Custodians</a></li>
+        </ul>
+      </li>
+      <li>
+        <a scroll-to-item offset=40 scroll-to="#networkstatus">Network Status</a>
+      </li>
+      <li>
+        <a scroll-to-item offset=40 scroll-to="#websockets" >Websockets</a>
+      </li>
+    </ul>
+  </div>
+  <div class="uk-panel uk-panel-box uk-width-large-3-4 uk-width-small-1-1">
+    <div id="singleblock" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Single Block</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/block/<strong>[hash or height]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/block/3000</strong>         
+      </pre>
+      Response
+      <pre>
+{
+    <span class="apiKey">"id"</span>: "c4d1f1f3a95553459b986f91c0868783af58129f1ff17c4be1d1b6058b25f6cb",
+    <span class="apiKey">"height"</span>: "3000",
+    <span class="apiKey">"size"</span>: "480",
+    <span class="apiKey">"ver"</span>: 1,
+    <span class="apiKey">"timestamp"</span>: "1436686845",
+    <span class="apiKey">"bits"</span>: "1e171a3d",
+    <span class="apiKey">"difficulty"</span>: "0.00016908",
+    <span class="apiKey">"nonce"</span>: "0",
+    <span class="apiKey">"merkleroot"</span>: "1b542d7fcf62bbc25e01f8c894026901a2646c33e4b4a99cb5cbcbdd2b28e9bd",
+    <span class="apiKey">"prevhash"</span>: "3ca972e37c42b696dd5a33fa4d3267911c41d0f133464ecaee8ef7aa28099439",
+    <span class="apiKey">"type"</span>: "proof-of-stake",
+    <span class="apiKey">"chain"</span>: "main",
+    <span class="apiKey">"numtx"</span>: "2",
+    <span class="apiKey">"proofhash"</span>: "0000102c45ea38b73f027578104c96d1aead7131400eadfa03fb48bb27f0195f",
+    <span class="apiKey">"modifier"</span>: "0a1dacce370a5258",
+    <span class="apiKey">"modifierchecksum"</span>: "0bb28345",
+    <span class="apiKey">"coinagedestroyed"</span>: "7",
+    <span class="apiKey">"mint"</span>: "0.0100",
+    <span class="apiKey">"vote"</span>: {
+      <span class="apiKey">"fees"</span>: {},
+      <span class="apiKey">"motions"</span>: [],
+      <span class="apiKey">"parkrates"</span>: [],
+      <span class="apiKey">"custodians"</span>: []
+    },
+    <span class="apiKey">"tx_received_bks"</span>: "10100",
+    <span class="apiKey">"solvedby"</span>: "8V9ccge24Zbj5ECFHN7REJiqANqRK1KmAr",
+    <span class="apiKey">"tx_recieved_bkc"</span>: null,
+    <span class="apiKey">"numtx_bks"</span>: "2",
+    <span class="apiKey">"numtx_bkc"</span>: "0",
+    <span class="apiKey">"tx_received_bkc"</span>: "0",
+    <span class="apiKey">"txs"</span>: [
+      "9262b297e8eaaad7da1ea315af48d83f3e0f6f68c16b85a4abb732b584d68b85",
+      "41f0fe6acbf20dead21d86d13ceb956b03cdd39a272c846b0e15dbd03e8c471d"
+    ],
+    <span class="apiKey">"nexthash"</span>: "684ba9203ddb80b02d0a45a1084d7ffd9aa0067b3e92cf4ee48286ee6fd71827",
+    <span class="apiKey">"conf"</span>: 334164
+}
+      </pre>
+    </div>
+    <div id="latestblocks" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Latest Blocks</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/latestblocks/<strong>[number >= 1]</strong>
+         <span class="apiComment">// Limit is 300 blocks</span>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/latestblocks/3</strong></span> 
+      </pre>
+      Response
+      <pre>
+[
+{
+    <span class="apiKey">"id"</span>: "c4d1f1f3a95553459b986f91c0868783af58129f1ff17c4be1d1b6058b25f6cb",
+    <span class="apiKey">"height"</span>: "3000",
+    <span class="apiKey">"size"</span>: "480",
+    ... [the rest of the block details]
+},
+{
+    <span class="apiKey">"id"</span>: "3ca972e37c42b696dd5a33fa4d3267911c41d0f133464ecaee8ef7aa28099439",
+    <span class="apiKey">"height"</span>: "2999",
+    <span class="apiKey">"size"</span>: "482",
+    ... [the rest of the block details]
+},
+{
+    <span class="apiKey">"id"</span>: "7d358abdfea5780cc26eba91872a2dce06121bc09def209cc5b6c3e29c419fb4",
+    <span class="apiKey">"height"</span>: "2998",
+    <span class="apiKey">"size"</span>: "481",
+    ... [the rest of the block details]
+}
+
+]
+      </pre>
+    </div>
+        <div id="blocktx" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Block Transactions</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/blocktx/<strong>[hash or height]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/blocktx/fa06ac019487fa66473342c70726247313d6492ed9be1323dea72deb16177eeb</strong></span>
+
+      </pre>
+      Response
+      <pre>
+[
+  {
+    "id": "a73884abd86cd3c90cde47b871e94b963871ae296d6a23d89f5f8105ead55ab0 ",
+    "ver": 1,
+    "timestamp": "1437007929",
+    ... [ the rest of the tx details]
+  },
+  {
+    "id": "b40b88b4648c819abceb62660bb5c76fc1d93f7014021630c7812832af79d997 ",
+    "ver": 1,
+    "timestamp": "1437007929",
+    ... [ the rest of the tx details]
+  }
+]
+      </pre>
+    </div>
+    <div id="singletx" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Single Transaction</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/tx/<strong>[hash]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/tx/bbce1d5e2ba046ab9f53bad7c7a7ca076a9f242e5f27b1b503c9aff414193def </strong></span>
+      </pre>
+      Response
+      <pre>
+{
+  <span class="apiKey">"hash"</span>: "bbce1d5e2ba046ab9f53bad7c7a7ca076a9f242e5f27b1b503c9aff414193def",
+  <span class="apiKey">"ver"</span>: 1,
+  <span class="apiKey">"timestamp"</span>: "1436735385",
+  <span class="apiKey">"in_count"</span>: 1,
+  <span class="apiKey">"inputs"</span>: [
+    {
+      <span class="apiKey">"in_tx"</span>: "4c7b3cc025b3941fc0aef29c3464b7a50ea22025da6d81705f46d1e1543b38ea",
+      <span class="apiKey">"in_num"</span>: 0,
+      <span class="apiKey">"in_val"</span>: 10000,
+      <span class="apiKey">"address"</span>: "8Y2i2bQxwaaCViYhYHzTztXEfP6Hx7LqGL",
+      <span class="apiKey">"in_index"</span>: 1102
+    }
+  ],
+  <span class="apiKey">"out_count"</span>: 4,
+  <span class="apiKey">"outputs"</span>: [
+    {
+      <span class="apiKey">"type"</span>: "None",
+      <span class="apiKey">"script"</span>: {
+        <span class="apiKey">"raw"</span>: "00",
+        <span class="apiKey">"decode"</span>: "00"
+      },
+      <span class="apiKey">"address"</span>: "None",
+      <span class="apiKey">"hash160"</span>: "None",
+      <span class="apiKey">"out_num"</span>: 0,
+      <span class="apiKey">"out_val"</span>: 0,
+      <span class="apiKey">"spent"</span>:false
+    },
+    {
+      <span class="apiKey">"type"</span>: "pubkey",
+      <span class="apiKey">"script"</span>: {
+        <span class="apiKey">"raw"</span>: "03fd673264ecedb58cd1aadebd1f8f562d2d8f184904d60258c0ba20a657d40424ac",
+        <span class="apiKey">"decode"</span>: "03fd673264ecedb58cd1aadebd1f8f562d2d8f184904d60258c0ba20a657d40424 OP_CHECKSIG"
+      },
+      <span class="apiKey">"address"</span>: "8Y2i2bQxwaaCViYhYHzTztXEfP6Hx7LqGL",
+      <span class="apiKey">"hash160"</span>: "b9e1a1a8bade9504e4e38af7ca58058676b126e2",
+      <span class="apiKey">"out_num"</span>: 1,
+      <span class="apiKey">"out_val"</span>: 10100,
+      <span class="apiKey">"spent"</span>:false
+    },
+    {
+      <span class="apiKey">"type"</span>: "NonStandard",
+      <span class="apiKey">"script"</span>: {
+        <span class="apiKey">"raw"</span>: "6a510880841e0000000000",
+        <span class="apiKey">"decode"</span>: "OP_RETURN OP_1 80841e0000000000"
+      },
+      <span class="apiKey">"address"</span>: "NonStandard",
+      <span class="apiKey">"hash160"</span>: "None",
+      <span class="apiKey">"out_num"</span>: 2,
+      <span class="apiKey">"out_val"</span>: 0,
+      <span class="apiKey">"spent"</span>:false
+    },
+    {
+      <span class="apiKey">"type"</span>: "NonStandard",
+      <span class="apiKey">"script"</span>: {
+        <span class="apiKey">"raw"</span>: "6a52024300",
+        <span class="apiKey">"decode"</span>: "OP_RETURN OP_2 4300"
+      },
+      <span class="apiKey">"address"</span>: "NonStandard",
+      <span class="apiKey">"hash160"</span>: "None",
+      <span class="apiKey">"out_num"</span>: 3,
+      <span class="apiKey">"out_val"</span>: 0,
+      <span class="apiKey">"spent"</span>:false
+    }
+  ],
+  <span class="apiKey">"type"</span>: "38", <span class="apiComment">// the type of transaction; 38 => BKS</span>
+  <span class="apiKey">"blockhash"</span>: "2842e74dec566c2378e2af1fd6457b5bbadfb0bfb281ccafa03f0d3a762c6ac0",
+  <span class="apiKey">"height"</span>: "4086",
+  <span class="apiKey">"chain"</span>: "main",
+  <span class="apiKey">"in_total"</span>: "10000",
+  <span class="apiKey">"out_total"</span>: "10100",
+  <span class="apiKey">"tx_num"</span>: "1",
+  <span class="apiKey">"coinstake"</span>: true,
+  <span class="apiKey">"coinagedestroyed"</span>: "8",
+  <span class="apiKey">"fee"</span>: 0,
+  <span class="apiKey">"conf"</span>: 333078
+}
+      </pre>
+    </div>
+    <div id="sendrawtx" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Send Raw Transaction</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-danger">POST</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/sendrawtx
+         <span class="apiComment">// sendrawtx takes two parameters, rawTx, and checkInputs (optional)</span>
+         <span class="apiComment">// use x-www-form-urlencoded & surround rawTx with quotes</span>
+         <span class="apiExample"><strong>rawTx: string and checkInputs: integer</strong></span>
+
+      </pre>
+      Response
+      <pre>
+<span class="apiComment">// Pass</span> 
+{
+  <span class="apiKey">"success"</span>: true,
+  <span class="apiKey">"status"</span>: "sent"
+}
+
+<span class="apiComment">// Fail</span> 
+{
+  <span class="apiKey">"success"</span>: false,
+  <span class="apiKey">"error"</span>: "Transaction hex string decode failed"
+}
+      </pre>
+    </div>
+    <div id="addressinfo" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Address Info</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/address/<strong>[address]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/address/8FhyeEaCwk1cbmaLKGWf7R24CQaxioBeVN</strong></span>
+      </pre>
+      Response
+      <pre>
+{
+  <span class="apiKey">"address"</span>: "8FhyeEaCwk1cbmaLKGWf7R24CQaxioBeVN",
+  <span class="apiKey">"hash160"</span>: "06d4bfff5813d9cbecd016157b40a0e9b18d7f3f",
+  <span class="apiKey">"numtx"</span>: "2213",
+  <span class="apiKey">"total_sent"</span>: "22727244",
+  <span class="apiKey">"total_received"</span>: "26729868",
+  <span class="apiKey">"balance"</span>: "4002624",
+  <span class="apiKey">"type"</span>: "BKS"
+}
+      </pre>
+    </div>   
+    <div id="addresstx" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Address Transactions</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/addresstxs/<strong>[address]</strong>/<strong>[how many]</strong>
+         <span class="apiComment">// [how many] is optional; defaults to 2; limit 50;</span>
+         <span class="apiComment">// The transactions are the newest address transactions.</span>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/addresstxs/8FhyeEaCwk1cbmaLKGWf7R24CQaxioBeVN/3</strong></span>
+      </pre>
+      Response
+      <pre>
+[
+  {
+    <span class="apiKey">"id"</span>: "171ff46fb2af8d8dc2cb3de391d532e99c6de4455874fa9c1e30ab433dbc7171",
+    <span class="apiKey">"ver"</span>: 1,
+    <span class="apiKey">"timestamp"</span>: "1456509390",
+    ... [ the rest of the tx details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "d56e734b098f71d892b3fb34eb82d95f6bb2361c3f871020ece5250d71892bbd",
+    <span class="apiKey">"ver"</span>: 1,
+    <span class="apiKey">"timestamp"</span>: "1456505855",
+    ... [ the rest of the tx details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "59f79540e7f0269ff46ae55105070f7c08fae32863b1ea594008d7aec25a0383",
+    <span class="apiKey">"ver"</span>: 1,
+    <span class="apiKey">"timestamp"</span>: "1456500740",
+    ... [ the rest of the tx details]
+  }
+]
+      </pre>
+    </div>
+    <div id="unspent" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Address Unspent Outputs</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/unspent/<strong>[address]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/unspent/8FhyeEaCwk1cbmaLKGWf7R24CQaxioBeVN</strong></span>
+      </pre>
+      Response
+      <pre>
+{
+  <span class="apiKey">"address"</span>: "8NLfM4S7cysCuFPjxiheZhMxnGP5Yz17Av",
+  <span class="apiKey">"unspent_balance"</span>: 3690371,
+  <span class="apiKey">"txs"</span>: [
+    {
+      <span class="apiKey">"hash"</span>: "27f4728e47769ecc4e34607307f66b3e80c1edb19d64006a66c3c9e53552fa0a",
+      <span class="apiKey">"height"</span>: "10084",
+      <span class="apiKey">"conf"</span>: 330115,
+      <span class="apiKey">"out_index"</span>: 1,
+      <span class="apiKey">"amount"</span>: 10100,
+      <span class="apiKey">"type"</span>: "pubkey",
+      <span class="apiKey">"script"</span>: "0379c3520e14c2896d6bc3746c7a6ed8c889cbbf8afd73c11ffae0bd137d586a7f OP_CHECKSIG"
+    },
+    {
+      <span class="apiKey">"hash"</span>: "20753c3a1fb470a6b95a466f94eac838ed2a33bf33cfa9206970311f35599b90",
+      <span class="apiKey">"height"</span>: "10079",
+      <span class="apiKey">"conf"</span>: 330120,
+      <span class="apiKey">"out_index"</span>: 1,
+      <span class="apiKey">"amount"</span>: 10100,
+      <span class="apiKey">"type"</span>: "pubkey",
+      <span class="apiKey">"script"</span>: "0379c3520e14c2896d6bc3746c7a6ed8c889cbbf8afd73c11ffae0bd137d586a7f OP_CHECKSIG"
+    },
+    ... [ the rest of the unspent outputs]
+  ]
+}
+      </pre>
+    </div>    
+    <div class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 id="singlemotion" class="uk-panel-title">Single Motion</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/motion/<strong>[hash]</strong>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/motion/0000000000000000000000000000000000000747</strong></span>
+      </pre>
+      Response
+      <pre>
+{
+    <span class="apiKey">"id"</span>: "0000000000000000000000000000000000000747",
+    <span class="apiKey">"numvotes"</span>: 785,
+    <span class="apiKey">"totalvotes"</span>: 803,
+    <span class="apiKey">"sdd"</span>: "39583",
+    <span class="apiKey">"passed"</span>: false,
+    <span class="apiKey">"passedblock"</span>: "0",
+    <span class="apiKey">"latest_block"</span>: "335110",
+    <span class="apiKey">"latest_vote"</span>: 3997,
+    <span class="apiKey">"total_sdd"</span>: 502253,
+    <span class="apiKey">"last_100"</span>: 0 <span class="apiComment">// number of votes in last 100 blocks</span>
+}
+      </pre>
+    </div>
+    <div id="allmotions" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">All Motions in Progress</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/allmotions
+      </pre>
+      Response
+      <pre>
+[
+  {
+    <span class="apiKey">"id"</span>: "0000000000000000000000000000000000000747",
+    <span class="apiKey">"numvotes"</span>: 785,
+    ... [ the rest of the motion details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "7320612074657374206d6f74696f6e2068617368",
+    <span class="apiKey">"numvotes"</span>: 1,
+    ... [ the rest of the motion details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "e6f43c58bc73bb77243269f53cd3dec4cd44d87a",
+    <span class="apiKey">"numvotes"</span>: 1,
+    ... [ the rest of the motion details]
+  }
+]
+      </pre>
+    </div>
+    <div id="allsuccessmotions" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">All Successful Motions</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/allsuccessmotions
+      </pre>
+      Response
+      <pre>
+[
+  {
+    <span class="apiKey">"id"</span>: "0000000000000000000000000000000000000747",
+    <span class="apiKey">"numvotes"</span>: 785,
+    <span class="apiKey">"passed"</span>:true,
+    ... [ the rest of the motion details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "7320612074657374206d6f74696f6e2068617368",
+    <span class="apiKey">"numvotes"</span>: 1,
+    <span class="apiKey">"passed"</span>:true,
+    ... [ the rest of the motion details]
+  },
+  {
+    <span class="apiKey">"id"</span>: "e6f43c58bc73bb77243269f53cd3dec4cd44d87a",
+    <span class="apiKey">"numvotes"</span>: 1,
+    <span class="apiKey">"passed"</span>:true,
+    ... [ the rest of the motion details]
+  },
+    ...
+]
+      </pre>
+    </div>
+    <div id="singlecusto" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Single Custodian</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/custodian/<strong>[hash]</strong>/<strong>[amount]</strong>
+         <span class="apiComment">//amount is required and an integer; take amount in BKC and *10000</span>
+         <span class="apiComment">//for custodian CfMpuMotZeDPtiYpgB4y4NxBScJMYmjBe6 with amount 1BKC</span>
+Example: <span class="apiExample"><strong>YOUR_DOMAIN/api/v1/custodian/CfMpuMotZeDPtiYpgB4y4NxBScJMYmjBe6/10000</strong></span>
+      </pre>
+      Response
+      <pre>
+{
+    <span class="apiKey">"address"</span>: "CfMpuMotZeDPtiYpgB4y4NxBScJMYmjBe6",
+    <span class="apiKey">"amount"</span>: "10000",
+    <span class="apiKey">"numvotes"</span>: 1,
+    <span class="apiKey">"totalvotes"</span>: 130,
+    <span class="apiKey">"sdd"</span>: "154",
+    <span class="apiKey">"passed"</span>: false,
+    <span class="apiKey">"passedblock"</span>: "0",
+    <span class="apiKey">"latest_block"</span>: "132139",
+    <span class="apiKey">"latest_vote"</span>: 206975,
+    <span class="apiKey">"total_sdd"</span>: 502346,
+    <span class="apiKey">"last_100"</span>: 0 <span class="apiComment">// number of votes in last 100 blocks</span>
+}
+      </pre>
+    </div>
+    <div id="allcusto" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">All Custodians in Progress</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/allcustodians
+      </pre>
+      Response
+      <pre>
+[
+{
+    <span class="apiKey">"address"</span>: "CfMpuMotZeDPtiYpgB4y4NxBScJMYmjBe6",
+    <span class="apiKey">"amount"</span>: "10000",
+    <span class="apiKey">"numvotes"</span>: 1,
+    ... [ the rest of the custodian details]
+},
+{
+    <span class="apiKey">"address"</span>: "CsDdsdsf12d48jesdaLasdfmmNsawwqR85",
+    <span class="apiKey">"amount"</span>: "20000",
+    <span class="apiKey">"numvotes"</span>: 1,
+    ... [ the rest of the custodian details]
+}
+    ...
+]
+      </pre>
+    </div>
+    <div id="allsuccesscusto" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">All Successful Custodians</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/allsuccesscustodians
+      </pre>
+      Response
+      <pre>
+[
+{
+    <span class="apiKey">"address"</span>: "CfMpuMotZeDPtiYpgB4y4NxBScJMYmjBe6",
+    <span class="apiKey">"amount"</span>: "10000",
+    <span class="apiKey">"numvotes"</span>: 1,
+    <span class="apiKey">"passed"</span>: true,
+    ... [ the rest of the custodian details]
+},
+{
+    <span class="apiKey">"address"</span>: "CsDdsdsf12d48jesdaLasdfmmNsawwqR85",
+    <span class="apiKey">"amount"</span>: "20000",
+    <span class="apiKey">"numvotes"</span>: 1,
+    <span class="apiKey">"passed"</span>: true,
+    ... [ the rest of the custodian details]
+}
+    ...
+]
+      </pre>
+    </div>
+    <div id="networkstatus" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1">
+      <h3 class="uk-panel-title">Network Status</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-notification">GET</div>
+      Request
+      <pre>
+         YOUR_DOMAIN/api/v1/status
+      </pre>
+      Response
+      <pre>
+{  
+  <span class="apiKey">"height"</span>: "340198",
+  <span class="apiKey">"bks_supply"</span>: "187275.0066",
+  <span class="apiKey">"bkc_supply"</span>: "0",
+  <span class="apiKey">"connections"</span>: "8",
+  <span class="apiKey">"difficulty"</span>: "0.00071788",
+  <span class="apiKey">"pos_blocks"</span>: "339797",
+  <span class="apiKey">"pow_blocks"</span>: "401",
+  <span class="apiKey">"total_tx"</span>: "19889" <span class="apiComment">// the total number of transactions in the network</span>
+}
+      </pre>
+    </div>
+    <div id="websockets" class="uk-panel uk-panel-box uk-panel-header uk-width-1-1" id="websocket">
+      <h3 class="uk-panel-title">Websocket Channel</h3>
+      <div class="uk-panel-badge uk-badge uk-badge-success">WSS</div>
+      Connection URL
+      <pre>
+         wss://bcblockexplorer.com/
+      </pre>
+      Response
+      <pre>
+        <span class="apiComment">// Correctly connecting to the websocket channel</span>
+        {"message":"B&C Explorer Websocket connection established"}
+        <span class="apiComment">// Once your connected, the websocket server can broadcast the following</span>
+
+        <span class="apiComment">// messages are sent in JSON format, so make sure to JSONparse([object]) </span>
+        <span class="apiComment">//sent to clients when new block found</span>
+        {<span class="apiKey">"type"</span>: "status", <span class="apiKey">"info"</span>: [object]}
+        <span class="apiComment">//also sent to clients when new block found</span> 
+        {<span class="apiKey">"type"</span>: "block", <span class="apiKey">"info"</span>: [object]}
+        <span class="apiComment">//sent to clients when unconfirmed tx. found</span>
+        {<span class="apiKey">"type"</span>: "tx", <span class="apiKey">"info"</span>: [object]}
+        <span class="apiComment">//sent to clients when motion is found or updated</span>
+        {<span class="apiKey">"type"</span>: "motion", <span class="apiKey">"op"</span>:motion_data.type,<span class="apiKey">"info"</span>: [object]} 
+        <span class="apiComment">//sent to clients when custodian is found or updated</span>
+        {<span class="apiKey">"type"</span>: "custo", <span class="apiKey">"op"</span>:custo_data.type, <span class="apiKey">"info"</span>: [object]} 
+      </pre>
+    </div>
+  </div>
+</div>
+

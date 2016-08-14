@@ -1,0 +1,50 @@
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top">
+<h2>Custodians in Progress</h2>
+</div>
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top">
+<a data-ng-href="/custodians_passed"><button class="motionsPassed uk-button-third">Successful Grants</button></a>
+</div>
+<div class="uk-grid uk-grid-9-10 uk-container-center uk-margin-top tableMinHeight">
+<table class="motionTable uk-width-1-1" rules="none" data-ng-controller="CustodianController as vm">
+    <tr id="label">
+        <td>Address</td> 
+        <td>Amount</td>
+        <td class="uk-hidden-medium uk-hidden-small">Last 100 Blocks</td> 
+        <td class="uk-hidden-medium uk-hidden-small">Latest Vote</td>          
+        <td>Num. Votes</td> 
+        <td>SDD(Vote/Total)</td>        
+        
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveRow animated fadeInDown" data-ng-if="vm.data.length === 0"><td colspan="6">No Grants In Progress</td></tr>
+        <tr class="liveRow animated fadeInDown" data-ng-repeat="custo in vm.data">
+            <td class="uk-visible-large">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address}}</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-medium">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address.substring(0,8)}}...</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td class="uk-visible-small">
+            <a data-ng-href="/votedfor/custodian/{{custo.address}}/{{custo.amount}}/1">{{custo.address.substring(0,4)}}...</a>
+            <a data-ng-if="custo.url !== '?'" data-ng-href="custo.url"><i class="fa fa-external-link"></i></a>
+            </td>
+            <td>{{custo.amount/10000 | number}} BKC</td>
+            <td class="uk-hidden-medium uk-hidden-small">{{custo.last_100 | number}} votes</td>
+            <td class="uk-hidden-medium uk-hidden-small"><a data-ng-href="/blocks/{{custo.latest_block}}/1">{{custo.latest_vote | number}}</a> <span style="color:grey"> blocks ago</span></td>
+            <td><span data-ng-if="custo.last_100 > 5" style="color:green"><i class="fa fa-arrow-circle-up"></i></span>
+                <span data-ng-if="custo.last_100 <=5 && custo.last_100 > 0 " style="color:amber"><i class="fa fa-arrow-circle-up"></i></span>
+                <span data-ng-if="custo.last_100 <= 0 && custo.latest_vote < 10000" style="color:red"><i class="fa fa-arrow-circle-down"></i></span>
+                <span data-ng-if="custo.latest_vote < 10000 && custo.numvotes >= 1">{{custo.numvotes | number}}</span>
+		<span data-ng-if="custo.latest_vote > 10000">0</span>
+                <span data-ng-if="(custo.numvotes/10000)*100 > 50" style="color:green"><i class="fa fa-check"></i></span>
+            </td>
+            <td>{{custo.sdd | number}} / {{custo.total_sdd | number}} <span class="uk-hidden-medium uk-hidden-small" style="color:grey"> ({{custo.sdd/custo.total_sdd | number:2}} %)</span>
+                <span data-ng-if="(custo.sdd/custo.total_sdd)*100 > 50" style="color:green"><i class="fa fa-check"></i></span>
+            </td> 
+                   
+        </tr>
+    </tbody>
+</table>
+</div>

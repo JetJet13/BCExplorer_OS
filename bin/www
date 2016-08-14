@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+var debug = require('debug')('BCExplorer_OS');
+var fs = require('fs');
+var pg = require('pg');
+var ws = require('ws').Server;
+
+var http = require('http');
+var app = require('../app');
+var myLogger = app.get('myLogger');
+app.set('port', process.env.PORT || 443);
+
+
+var http_server = http.createServer(app);
+http_server.listen(80);
+
+
+var webSocket = new ws({server: http_server});
+
+webSocket.on('connection', function connection(ws) {
+  ws.send(JSON.stringify({"message":"B&C Explorer Websocket connection established"}));
+  console.log('WebSocket Server has found a client');
+});
+
+//create the broadcast function/method
+webSocket.broadcast = function broadcast(data) {
+  webSocket.clients.forEach(function each(client) {
+    client.send(data);
+  });
+};
+//TRACK CHANGES IN POSTGRESQL TABLES
+var client = new pg.Client("postgres://<username>:<password>@localhost:4567/bcexchange");
+client.connect();
+client.query('LISTEN table_update');
+client.query('LISTEN block_insert');
+client.query('LISTEN unconfirmed_tx_insert');
+client.query('LISTEN motion_update');
+client.query('LISTEN custodian_update');
+client.on('notification', function(msg) {
+    if (msg.name === 'notification' && msg.channel === 'table_update'){
+        var status_data = JSON.parse(msg.payload);
+        console.log(status_data);
+        webSocket.broadcast(JSON.stringify({"type": "status", "info": status_data.info}));
+    }
+    if (msg.name === 'notification' && msg.channel === 'block_insert'){
+
+        var block_data = JSON.parse(msg.payload);
+        console.log(block_data);
+        webSocket.broadcast(JSON.stringify({"type": "block", "info": block_data.info}));
+    }
+    if (msg.name === 'notification' && msg.channel === 'unconfirmed_tx_insert'){
+        var tx_data = JSON.parse(msg.payload);
+        console.log(tx_data);
+        webSocket.broadcast(JSON.stringify({"type": "tx", "info": tx_data.info}));
+    }
+    if (msg.name === 'notification' && msg.channel === 'motion_update'){
+        var motion_data = JSON.parse(msg.payload);
+        console.log(motion_data);
+        webSocket.broadcast(JSON.stringify({"type": "motion", "op":motion_data.type,"info": motion_data.info}));
+    }
+    if (msg.name === 'notification' && msg.channel === 'custodian_update'){
+        var custo_data = JSON.parse(msg.payload);
+        console.log(custo_data);
+        webSocket.broadcast(JSON.stringify({"type": "custo", "op":custo_data.type, "info": custo_data.info}));
+    }
+});
+

@@ -1,0 +1,153 @@
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-large-top">
+	<div class="uk-width-1-2">
+	<h2>Transaction</h2>
+	</div>
+	<div class="uk-width-1-2">
+	<button class="exDetail  uk-float-right" data-ng-if="detail === 'reg'" data-ng-click="toggle()"><i class="fa fa-toggle-off fa-2x"></i></button>
+    <button class="reDetail  uk-float-right" data-ng-if="detail === 'ext'" data-ng-click="toggle()"><i class="fa fa-toggle-on fa-2x"></i></button>
+    <span class='showLinks uk-float-right'>show spent</span>
+    </div>
+</div>
+<div data-ng-controller="TransController">
+<div class="uk-grid uk-width-9-10 uk-container-center" infinite-scroll="moretxs(block_data.id, nxt_page, block_data.numtx)" infinite-scroll-disabled="isBusy">
+	<div class="uk-panel uk-panel-header uk-panel-divider uk-panel-box uk-width-1-1 uk-align-center">
+		<h3 class="uk-panel-title" style="font-size: 11pt;">
+			<a data-ng-click="goNav(tx.id,'tx')">
+				<span class="uk-hidden-small">{{tx.id}}</span>
+				<span class="uk-visible-small">{{tx.id.substring(0,20)}}...</span>
+			</a>
+			<span class="txHashSpan uk-hidden-small uk-hidden-medium">
+				{{tx.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}
+			</span>			
+		</h3>
+		<table class="uk-width-1-1" rules="none">
+		<tbody class="txBody">
+		<tr class="tx">
+			<td class="txDetail">
+				<li data-ng-repeat="inp in tx.inputs">
+                    <a data-ng-href="/transactions/{{inp.in_tx}}"><span class="hand-o-left"><i class="fa fa-hand-o-left" data-ng-if="inp.address !== 'Coinbase' && detail === 'ext'"></i></span></a>
+                    <a data-ng-if="inp.address !== 'Coinbase'" data-ng-click="goNav(inp.address,'address')">
+                    <span class="uk-visible-large">{{inp.address}}</span>
+                    <span class="uk-visible-medium">{{inp.address.substring(0,8)}}...</span>
+                    <span class="uk-visible-small">{{inp.address.substring(0,4)}}...</span>
+                    </a>
+                    <span data-ng-if="inp.address === 'Coinbase'" class="emptyAddress">{{inp.address}}</span>
+                </li>
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="inp in tx.inputs">
+				{{inp.in_val/10000 | number}} BKS
+				</li>
+			</td>
+			<td class="txDetail">
+				<!-- <img src="/images/bluechevron.png"> -->
+				<i class="uk-icon-chevron-right uk-icon-medium" style="color:#004d40;"></i>
+
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="out in tx.outputs">
+                    <a data-ng-if="out.address !== 'None' && out.address !== 'NonStandard'" data-ng-click="goNav(out.address,'address')">
+                    	<span class="uk-visible-large">{{out.address}}</span>
+                    	<span class="uk-visible-medium">{{out.address.substring(0,8)}}...</span>
+                    	<span class="uk-visible-small">{{out.address.substring(0,4)}}...</span>
+
+                    </a>
+                    <span data-ng-if="out.address === 'None' || out.address === 'NonStandard'" class="emptyAddress">{{out.address}}</span>
+                    <a data-ng-href="/transactions/{{tx.out_txs[out.out_num]}}">
+                    	<span class="hand-o-right">
+                    	<i class="fa fa-hand-o-right" data-ng-if="out.address !== 'None' && out.address !== 'NonStandard' && detail === 'ext' && tx.out_txs[out.out_num] !== 'unspent'"></i>
+                    	</span>
+                    </a> 
+                </li>
+			</td>
+			<td class="txDetail">
+				<li data-ng-repeat="out in tx.outputs">
+				{{out.out_val/10000 | number}} BKS
+				</li>	
+			</td>
+			<td class="uk-visible-large">
+				<button class="outAmount uk-button-third" data-ng-click="toggleCurrency(currency)">{{tx.out_total/10000 | number}} BKS</button>
+                <button class="SDD uk-button-secondary" data-ng-if="tx.coinstake === true">{{tx.coinagedestroyed | number}} SDD</button>
+				<button class="confBlue uk-button-primary" data-ng-if="block_data.conf <=9">{{block_data.conf}} Confirmations</button>
+			</td>
+		</tr>
+	</tbody>
+	</table>
+	<div class="uk-width-1-1 uk-hidden-large uk-text-center">
+				<button class="uk-button uk-button-third" data-ng-click="toggleCurrency(currency)">{{tx.out_total/10000 | number}} BKS</button>
+                <button class="uk-button uk-button-secondary" data-ng-if="tx.coinstake === true">{{tx.coinagedestroyed | number}} SDD</button>
+				<button class="uk-button uk-button-primary" data-ng-if="block_data.conf <=9">{{block_data.conf}} Confirmations</button>
+	</div>
+	</div>
+</div>
+<div class="uk-grid uk-width-9-10 uk-container-center">
+	<div class="uk-width-large-5-10 uk-width-medium-1-1 uk-width-small-1-1">
+		<table id="transSummaryTable" class="uk-width-1-1"  rules="none">
+			<tr>
+				<td class="tableHeader" colspan="2">Summary</td>
+				
+			</tr>
+			<tr class="transDet">
+				<td>TimeStamp</td>
+				<td>{{tx.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}</td>
+			</tr>
+			<tr class="transDet">
+				<td>Confirmations</td>
+				<td>{{tx.conf | number}}</td>
+			</tr>
+			<tr class="transDet">
+				<td>Block</td>
+				<td><a data-ng-click="goNav(tx.height,'block')">{{tx.height | number}}</a></td>
+			</tr>
+		</table>
+	</div>
+	<div class="uk-width-large-4-10 uk-width-medium-1-1 uk-width-small-1-1">
+		<table id="transDetailTable" class="uk-width-1-1" rules="none">
+			<tr>
+				<td class="tableHeader" colspan="2">Inputs &amp; Outputs</td>
+				
+			</tr>
+			<tr class="transDet">
+				<td>Total Inputs</td>
+				<td>{{tx.in_total/10000 | number}} BKS</td>
+			</tr>
+			<tr class="transDet">
+				<td>Total Outputs</td>
+				<td>{{tx.out_total/10000 | number}} BKS</td>
+			</tr>
+			<tr class="transDet">
+				<td>Fee</td>
+				<td>{{tx.fee/10000 | number}} BKS</td>
+			</tr>
+		</table>
+	</div>
+</div>
+	<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+		<div class="uk-width-1-1">
+			<table id="inScriptTable" class="uk-width-1-1">
+				<tbody>
+					<tr>
+						<td id="inScriptHeader">Input Scripts <span class="scriptSpan">( toggle 'show spent' to reveal scripts )</span></td>
+					</tr>
+					<tr data-ng-if="detail === 'ext'">
+						<td id="inScript"><li data-ng-repeat="inp in tx.inputs">{{inp.in_script}}</li></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="uk-width-1-1">
+			<table id="outScriptTable" class="uk-width-1-1">
+				<tbody>
+					<tr>
+						<td id="outScriptHeader">Output Scripts <span class="scriptSpan">( toggle 'show spent' to reveal scripts )</span></td>
+					</tr>
+					<tr data-ng-if="detail === 'ext'">
+						<td id="outScript">
+						<li data-ng-repeat="out in tx.outputs">{{out.script.raw}} <br> {{out.script.decode}}</li>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

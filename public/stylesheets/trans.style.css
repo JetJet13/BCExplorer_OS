@@ -1,0 +1,77 @@
+#transTop{
+	width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;
+}
+.transHeader{
+	float: left;	
+}
+#transSummaryTable{
+	/*float: left;
+	clear: both;
+	margin-left: 5%;
+	margin-top: 3%;
+	margin-bottom: 5%;
+	width: 45%;*/
+	font-size: 10pt;
+}
+#transDetailTable{
+	/*float: left;
+	width: 45%;
+	margin-left: -1px;
+	margin-top: 3%;*/
+	font-size: 10pt;
+}
+.transDet{
+	font-size: 10pt;
+	height: 36px;
+	border-color: #D8D8D8;
+}
+
+#inScriptTable{
+	/*float: left;
+	clear: both;
+	margin-left: 5%;
+	margin-bottom: 3%;
+	width: 90%;*/
+	font-size: 10pt;
+    word-wrap: break-word;
+    table-layout: fixed;
+}
+#inScriptHeader{
+	background-color: none;
+	color: #2C4055;
+	border-bottom:0px solid #2C4055;
+	height: 36px;
+    font-weight: bold;
+}
+#inScript{
+	height: 36px;
+	color: #808080;
+}
+#outScriptTable{
+	/*float: left;
+	clear: both;
+	margin-left: 5%;
+    margin-bottom: 20px;
+	width: 90%;*/
+	font-size: 10pt;
+    word-wrap: break-word;
+    table-layout: fixed;
+}
+#outScriptHeader{
+	background-color: none;
+	color: #2C4055;
+	border-bottom:0px solid #2C4055;
+	height: 36px;
+    font-weight: bold;
+}
+#outScript{
+	height: 36px;
+	color: #808080;
+}
+.scriptSpan{
+	float: right;
+	margin-right: 5px;
+	
+}

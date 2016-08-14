@@ -1,0 +1,24 @@
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top uk-text-break">
+<h2>Wealthiest BlockShares Addresses</h2>
+</div>
+
+<div class="chevron_up" scroll-to-item scroll-to=".allTable"><i class="uk-icon-angle-up uk-icon-large"></i></div>
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+    <table class="allTable uk-width-1-1" rules="none" data-ng-controller="RichListBKSController">
+        <tr id="label">
+            <td>Rank</td>
+            <td>Address</td> 
+            <td class="uk-hidden-small">balance</td> 
+            <td class="uk-visible-large">Num. Trans.</td>         
+        </tr>
+        <tbody class="liveBlocks">
+            <tr class="liveRow animated fadeInDown" data-ng-repeat="info in data">
+                <td>{{info.rank}}</td>
+                <td class="uk-hidden-small"><a data-ng-click="goNav(info.id,'address')">{{info.id}}</a></td>
+                <td class="uk-visible-small"><a data-ng-click="goNav(info.id,'address')">{{info.id.substring(0,4)}}...</a></td>
+                <td class="uk-hidden-small">{{info.balance/10000 | number}} BKS</td>
+                <td class="uk-visible-large">{{info.numtx | number}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,57 @@
+#BlockNum{
+	margin-left: 5%;
+}
+.blockDetailTable{
+	/*width: 40%;
+	height:470px;*/
+	font-size: 10pt;
+/*	margin-left: 5%;
+	float: left;*/
+}
+.blockDetail{
+	border-color: #D8D8D8;
+	height: 36px;
+}
+
+.blockHashTable{
+	/*width: 49%;
+	height:144px;*/
+	font-size: 10pt;
+	/*float: left;*/
+}
+#txOptions{
+/*	width: 90%;
+	height: 80px;
+	float: left;
+	clear: both;
+	margin-left: 5%;
+	margin-right: 5%;
+	margin-top: 60px;*/
+
+}
+#txHeader{
+	float: left;
+	clear: both;
+}
+#feesTable{
+	width: 24.5%;
+	max-height:144px;
+	font-size: 10pt;
+	float: left;
+    overflow-y: scroll;	
+}
+#motionsTable{
+	width: 24.5%;
+	max-height:144px;
+	font-size: 10pt;
+	float: left;
+    overflow-y: scroll;	
+}
+#custoTable{
+	width: 40%;
+	max-height:144px;
+	font-size: 10pt;
+	float: left;
+        
+    overflow-y: scroll;	
+}

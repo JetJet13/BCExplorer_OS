@@ -1,0 +1,29 @@
+<div data-ng-controller="VotedForMotionController">
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top">
+<h2 id="allBlocks">All Block Votes for 
+<a class="uk-visible-large" data-ng-href="/motions">{{id}}</a>
+<a class="uk-visible-medium" data-ng-href="/motions">{{id.substring(0,12)}}...</a>
+<a class="uk-visible-small" data-ng-href="/motions">{{id.substring(0,8)}}...</a>
+</h2>
+</div>
+<div class="chevron_up" scroll-to-item scroll-to=".allTable"><i class="uk-icon-angle-up uk-icon-large"></i></div>
+<div class="uk-grid uk-container-center uk-width-9-10 uk-margin-top tableMinHeight">
+<table class="allTable uk-width-1-1" rules="none" infinite-scroll="moreblocks(nxt_page,data[0].count,id)" infinite-scroll-disabled="isBusy">
+    <tr id="label">
+        <td>Height</td> 
+        <td class="uk-visible-large">Age</td> 
+        <td>Solved by</td> 
+        <td>SDD</td>        
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveRow animated fadeInDown" data-ng-repeat="block in data">
+            <td><a data-ng-click="goNav(block.height,'block')">{{block.height | number}}</a></td>
+            <td class="uk-visible-large">{{block.timestamp*1000 | date:'h:mma MMMM dd, yyyy'}}</td>
+            <td class="uk-hidden-small"><a data-ng-click="goNav(block.solvedby,'address')">{{block.solvedby}}</a></td>  
+            <td class="uk-visible-small"><a data-ng-click="goNav(block.solvedby,'address')">{{block.solvedby.substring(0,4)}}...</a></td> 
+            <td>{{block.coinagedestroyed | number}}</td> 
+        </tr>
+    </tbody>
+</table>
+</div>
+</div>

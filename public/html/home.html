@@ -1,0 +1,58 @@
+<h2 id="LatestBlocks">Latest Blocks</h3>
+
+<table class="liveTable uk-width-1-1" rules="none" data-ng-controller="BlockLatestController as vm">
+    <tr class="label">
+        <td>Height</td> 
+        <td>Age</td> 
+        <td class="uk-hidden-small">Size (KB)</td>         
+        <td>Num. Tx.</td> 
+        <td class="uk-hidden-small uk-hidden-medium">Solved by</td> 
+        <td class="uk-hidden-small uk-hidden-medium">Total Out (BKS)</td>        
+        <td class="uk-hidden-small uk-hidden-medium">Total Out (BKC)</td>
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveRow animated fadeInDown" data-ng-repeat="block in vm.block_list">
+            <td><a data-ng-click="goNav(block.height,'block')">{{block.height | number}}</a></td>
+            <td>{{block.timestamp*1000 | timeAgo}}</td>
+            <td class="uk-hidden-small">{{block.size}}</td>
+            <td>{{block.numtx}}</td>
+            <td class="uk-hidden-small uk-hidden-medium"><a data-ng-click="goNav(block.solvedby,'address')">{{block.solvedby}}</td> 
+            <td class="uk-hidden-small uk-hidden-medium">{{block.tx_received_bks/10000 | number}} BKS</td> 
+            <td class="uk-hidden-small uk-hidden-medium">{{block.tx_received_bkc/10000 | number}} BKC</td>
+        </tr>
+    </tbody>
+</table>
+<hr style="width:36%;margin:10px auto;">
+<div class="uk-align-center uk-width-small-1-1"><a data-ng-href="/allBlocks/1"><button class="allBlocks uk-button-third uk-width-large-1-10 uk-width-medium-2-10 uk-width-small-1-1">All Blocks</button></a></div>
+
+<h2 id="LatestBlocks" class="uk-hidden-small">Latest Transactions</h2>
+<table class="liveTable uk-width-7-10 uk-float-left uk-hidden-small" rules="none" data-ng-controller="TransLatestController">
+    <tr id="label">
+        <td>Hash</td> <td>Age</td> <td>Total Out</td>
+    </tr>
+    <tbody class="liveBlocks">
+        <tr class="liveTxRow" data-ng-repeat="tx in tx_list">
+            <td><a data-ng-click="goNav('Lola','tx')">Lola</a></td>
+            <td>{{232331000 | timeAgo}}</td>
+            <td><button class="outAmount">{{2222222/10000 | number}} BKS</button></td>
+        </tr>
+        <tr class="liveTxRow" data-ng-repeat="tx in tx_list">
+            <td><a data-ng-click="goNav(tx.id,'tx')">{{tx.id}}</a></td>
+            <td>{{tx.timestamp*1000 | timeAgo}}</td>
+            <td><button class="outAmount">{{tx.out_total/10000 | number}} BKS</button></td>
+        </tr>     
+    </tbody>
+</table>
+<div class="uk-panel uk-panel-box uk-panel-header uk-width-3-10 uk-text-center uk-float-left uk-margin-large-bottom uk-hidden-small">
+    <h3 class="uk-panel-title">About</h3>    
+    Welcome,
+B&amp;C Explorer is a B&amp;C Exchange block explorer. Query for blocks, transactions, and addresses found in the B&amp;C network.
+<br/>
+SDD = Share Days Destroyed
+<br/>
+SDA = Share Days Accumulated 
+<br/>
+</div>
+
+
+

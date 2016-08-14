@@ -1,0 +1,32 @@
+<div class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<h2>Charts</h2>
+</div>
+
+<div data-ng-controller="ChartController" class="uk-grid uk-width-9-10 uk-container-center uk-margin-top">
+<div class="uk-width-1-1 uk-align-center">
+<ul class="uk-subnav uk-subnav-pill uk-flex uk-flex-center">
+
+
+<a data-ng-href="/charts/size"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. Sizes</button></a>
+<a data-ng-href="/charts/diff"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. Difficulty</button></a>
+<a data-ng-href="/charts/numblocks"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. Num. Blocks</button></a>
+<a data-ng-href="/charts/numtx"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. Num. Trans.</button></a>
+<a data-ng-href="/charts/sdd"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. SDD</button></a>
+<a data-ng-href="/charts/mint"><button class="chartBtn uk-width-large-1-9 uk-button-third">Avg. Mint</button></a>
+</ul>
+</div>
+
+<div class="uk-width-1-1 uk-margin-small-top">
+<highchart class="animated fadeIn" config="chartSize" data-ng-if="id === 'size'"></highchart>
+<highchart class="animated fadeIn" config="chartDiff" data-ng-if="id === 'diff'"></highchart>
+<highchart class="animated fadeIn" config="chartNumBlocks" data-ng-if="id === 'numblocks'"></highchart>
+<highchart class="animated fadeIn" config="chartNumTx" data-ng-if="id === 'numtx'"></highchart>
+<highchart class="animated fadeIn" config="chartCD" data-ng-if="id === 'sdd'"></highchart>
+<highchart class="animated fadeIn" config="chartMint" data-ng-if="id === 'mint'"></highchart>
+</div>
+<div id="notice" class="uk-width-1-1">
+    <label>* Click on the labels (on the chart) to add or remove a plot line.</label>
+    <br>
+    <label>* Drag your mouse on the chart (to form a rectangle) to zoom in on the points.</label>    
+    </div>    
+</div>
