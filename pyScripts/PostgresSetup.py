@@ -3,7 +3,7 @@ from bitcoinrpc.authproxy import AuthServiceProxy
 import simplejson as json
 
 access = AuthServiceProxy("http://<user>:<pass>@127.0.0.1:2240")
-postgres = psycopg2.connect(database="bcexchange", user="<username>",port=4567, password="<password>")
+postgres = psycopg2.connect(database="bcexchange", user="<username>",port=5432, password="<password>")
 
 cursor = postgres.cursor()
 

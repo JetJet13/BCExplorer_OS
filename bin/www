@@ -28,7 +28,7 @@ webSocket.broadcast = function broadcast(data) {
   });
 };
 //TRACK CHANGES IN POSTGRESQL TABLES
-var client = new pg.Client("postgres://<username>:<password>@localhost:4567/bcexchange");
+var client = new pg.Client("postgres://<username>:<password>@localhost:5432/bcexchange");
 client.connect();
 client.query('LISTEN table_update');
 client.query('LISTEN block_insert');

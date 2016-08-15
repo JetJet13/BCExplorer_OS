@@ -17,7 +17,7 @@ print "Current block count: ", access.getblockcount()
 # DATE: 29/04/2014
 # HEXHASHREVERSER IS USED FOR PREV.BLOCK[v] HASH, MERKLE ROOT, BITS, RAW BLOCK[v] HASH ETC.
 # GETDIFFICULT WILL SPIT OUT THE DIFFICULTY OF THE BLOCK
-postgres = psycopg2.connect(database="bcexchange", user="<username>",port=4567, password="<password>")
+postgres = psycopg2.connect(database="bcexchange", user="<username>",port=5432, password="<password>")
 cursor = postgres.cursor()
 cursor.execute("SELECT data from chart_info where id='diff_chart';")
 get_data = cursor.fetchall()[0][0]

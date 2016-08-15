@@ -338,155 +338,7 @@ def removeDups(seq):
 
 start_time = time.time()
 
-# --------------------- LET'S CHECK IF THE BLOCKS HAVE CHANGED FROM MAIN TO ORPHAN & VICE VERSA
-blockCount = access.getblockcount()
-getBlocks = blockCount - 280
-print "Current block count: ", blockCount
-d_cursor.execute("SELECT * FROM blocks WHERE height >= %s;",(getBlocks, ))
-get_fetch = d_cursor.fetchall()
-d_rowCount = d_cursor.rowcount
-#print get_fetch
-for q in xrange(0, d_rowCount):
-    b = get_fetch[q]
-    height = b["height"]
-    hash = b["id"]
-    chain = b["chain"]
-    txs = b["txs"]
-    checkBlock = access.getblockhash(height)
-    if checkBlock != hash: # MAIN CHAIN TO ORPHAN CHAIN
-        print "uh-oh block is orphaned",height
-        get_fetch[q]["chain"] = "orphan"
-        print hash
-        cursor.execute("UPDATE blocks SET chain = 'orphan' WHERE id = %s;", (hash, ))
-        postgres.commit()
-        cursor.execute("INSERT INTO orphan_blocks SELECT * FROM blocks WHERE id = %s;", (hash, ))
-        postgres.commit()
-        for z in txs:
-            print z
-            print txs
-            cursor.execute("UPDATE transactions SET chain = 'orphan' WHERE id = %s;", (z, ))
-            postgres.commit()
-            cursor.execute("INSERT INTO orphan_transactions SELECT * FROM transactions WHERE id = %s;", (z, ))
-            postgres.commit()
-            d_cursor.execute("SELECT * FROM transactions WHERE id = %s;", (z, ))
-            t = d_cursor.fetchone()
-            print t
-            t_type = t["type"]
-            t_outCount = t["out_count"]
-            t_inCount = t["in_count"]
-            t_outputs = t["outputs"]
-            t_inputs = t["inputs"]
-            t_addresses = t["addresses"]
-            for w in t_addresses:
-                if t_type == '38': # BKS
-                    update_numtx = "UPDATE address_bks SET numtx = numtx - 1 WHERE id = %s;"
-                else: # BKC
-                    update_numtx = "UPDATE address_bkc SET numtx = numtx - 1 WHERE id = %s;"        
-                update_numtx_data = (w, )
-                cursor.execute(update_numtx, update_numtx_data)
-                postgres.commit()
-            for q in xrange(0, t_outCount):
-                out_address = t_outputs[q]["address"]
-                out_val = t_outputs[q]["out_val"]
-                print out_address,out_val
-                if out_address != "None" and out_address != "NonStandard":
-                    if t_type == '38':
-                        cursor.execute("UPDATE address_bks SET total_received = total_received - %s, balance = balance - %s WHERE id = %s;", (out_val, out_val, out_address, ))
-                    else:
-                        cursor.execute("UPDATE address_bkc SET total_received = total_received - %s, balance = balance - %s WHERE id = %s;", (out_val, out_val, out_address, ))
-                    postgres.commit()
-            for q in xrange(0, t_inCount):
-                in_address = t_inputs[q]["address"]
-                in_val = t_inputs[q]["in_val"]
-                print in_address,in_val
-                if in_address != "Coinbase":
-                    if t_type == '38':
-                        cursor.execute("UPDATE address_bks SET total_sent = total_sent - %s, balance = balance + %s WHERE id = %s;", (in_val, in_val, in_address, ))
-                    else:
-                        cursor.execute("UPDATE address_bkc SET total_sent = total_sent - %s, balance = balance + %s WHERE id = %s;", (in_val, in_val, in_address, ))
-                    postgres.commit()
-            cursor.execute("DELETE FROM transactions WHERE id = %s;", (z, ))
-            postgres.commit()
 
-
-        cursor.execute("DELETE FROM blocks WHERE id = %s;", (hash, ))
-        postgres.commit()
-        print checkBlock
-        d_cursor.execute("SELECT * FROM orphan_blocks WHERE id = %s;", (checkBlock, ))
-        o = d_cursor.fetchone()
-        print o
-        o["chain"] = "main"
-        o_txs = o["txs"]
-        cursor.execute("UPDATE orphan_blocks SET chain = 'main' WHERE id = %s;", (checkBlock, ))
-        postgres.commit()
-        cursor.execute("INSERT INTO blocks SELECT * FROM orphan_blocks WHERE id = %s;", (checkBlock, ))
-        postgres.commit()
-        for z in o_txs:
-            print z
-            cursor.execute("UPDATE orphan_transactions SET chain = 'main' WHERE id = %s;", (z, ))
-            postgres.commit()
-            cursor.execute("INSERT INTO transactions SELECT * FROM orphan_transactions WHERE id = %s;", (z, ))
-            postgres.commit()
-            d_cursor.execute("SELECT * FROM orphan_transactions WHERE id = %s;", (z, ))
-            t = d_cursor.fetchone()
-            t_type = t["type"]
-            t_outCount = t["out_count"]
-            t_inCount = t["in_count"]
-            t_outputs = t["outputs"]
-            t_inputs = t["inputs"]
-            t_addresses = t["addresses"]
-            print t
-            for q in xrange(0, t_outCount):
-                out_address = t_outputs[q]["address"]
-                out_val = t_outputs[q]["out_val"]
-                if out_address != "None" and out_address != "NonStandard":
-                    if t_type == '38': # BKS
-                        cursor.execute("SELECT id FROM address_bks WHERE id = %s;", (out_address, ))
-                        if cursor.rowcount == 0:
-                            cursor.execute("INSERT INTO address_bks (id, hash160, numtx, total_sent, total_received, \
-                                            balance, type) VALUES (%s,%s,%s,%s,%s,%s,%s);", (out_address, t_outputs[q]["hash160"],
-                                            0, 0, out_val, out_val, 'BKS', ))
-                            postgres.commit()
-                        else:
-                            cursor.execute("UPDATE address_bks SET total_received = total_received + %s, balance = balance + %s WHERE id = %s;", (out_val, out_val, out_address, ))
-                            postgres.commit()
-                    else: # BKC
-                        cursor.execute("SELECT id FROM address_bkc WHERE id = %s;", (out_address, ))
-                        if cursor.rowcount == 0:
-                            cursor.execute("INSERT INTO address_bkc (id, hash160, numtx, total_sent, total_received, \
-                                            balance, type) VALUES (%s,%s,%s,%s,%s,%s,%s);", (out_address, t_outputs[q]["hash160"],
-                                            0, 0, out_val, out_val, 'BKC', ))
-                            postgres.commit()
-                        else:
-                            cursor.execute("UPDATE address_bkc SET total_received = total_received + %s, balance = balance + %s WHERE id = %s;", (out_val, out_val, out_address, ))
-                            postgres.commit()
-            for w in t_addresses:
-                if t_type == '38': # BKS
-                    update_numtx = "UPDATE address_bks SET numtx = numtx + 1 WHERE id = %s;"
-                else: # BKC
-                    update_numtx = "UPDATE address_bkc SET numtx = numtx + 1 WHERE id = %s;"        
-                update_numtx_data = (w, )
-                cursor.execute(update_numtx, update_numtx_data)
-                postgres.commit()
-            for q in xrange(0, t_inCount):
-                in_address = t_inputs[q]["address"]
-                in_val = t_inputs[q]["in_val"]
-                if t["type"] == '38':
-                    cursor.execute("UPDATE address_bks SET total_sent = total_sent + %s, balance = balance - %s WHERE id = %s;", (in_val, in_val, in_address, ))
-                else:
-                    cursor.execute("UPDATE address_bkc SET total_sent = total_sent + %s, balance = balance - %s WHERE id = %s;", (in_val, in_val, in_address, ))
-                postgres.commit()
-            cursor.execute("DELETE FROM orphan_transactions WHERE id = %s;", (z, ))
-            postgres.commit()
-        cursor.execute("DELETE FROM orphan_blocks WHERE id = %s;", (o['id'], ))
-        postgres.commit()
-        
-        
-        
-
-
-
-# ---------------------------------------------------------------------------------------------
 # Linux Users
 blk01 = "/root/.bcexchange/blk0001.dat"
 blk02 = "/root/.bcexchange/blk0002.dat"
@@ -503,7 +355,7 @@ else:
     blk = blk01
 
 fi = open(blk, "rb")
-fi.seek(-100000,2)
+fi.seek(100000,0)
 data = fi.read()
 hex_data = data.encode('hex')
 
@@ -519,7 +371,7 @@ del block
 
 
 print "BlockChain Parsing in Progress..."
-start = len(wed) - 8 # latest 8 blocks
+start = 0
 end = len(wed)
 parseList = []
 for each in xrange(start, end):

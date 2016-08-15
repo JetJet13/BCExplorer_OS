@@ -1,6 +1,6 @@
 var bc = require('bitcoin');
 var postgre = require('pg');
-var client = new postgre.Client("postgres://<username>:<password>@localhost:4567/bcexchange");
+var client = new postgre.Client("postgres://<username>:<password>@localhost:5432/bcexchange");
 client.connect();
 var bc_client = new bc.Client({
   host: 'localhost',
