@@ -323,8 +323,10 @@ def InsertIntoChartInfo():
     postgres.commit()
 
 
-
+print "Creating tables and triggers"
 CreateTablesAndTriggers()
+print "Finished creating tables and triggers"
+print "Finishing up..."
 InsertIntoChartInfo()
 
 getInfo = access.getinfo()
@@ -349,3 +351,4 @@ postgres.commit()
 
 cursor.close()
 postgres.close()
+print "All done. PostgresSetup completed successfully."
