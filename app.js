@@ -47,8 +47,8 @@ app.set('views', path.join(__dirname, '/public/views'));
 app.set('view engine', 'pug');
 
 app.use(compress());
-app.use(favicon());
 app.use(logger('dev'));
+app.use(favicon(__dirname + '/public/images/favicon.ico'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(cookieParser());
