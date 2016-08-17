@@ -1,4 +1,5 @@
 # BCExplorer_OS - B&C Explorer
+[![Join the chat at https://gitter.im/bcexplorer-os/Lobby](https://badges.gitter.im/bcexplorer-os/Lobby.svg)](https://gitter.im/bcexplorer-os/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 ### Description
 An open source block explorer for the B&C Exchange network. 
 For more information about the B&C Exchange network visit <http://bcexchange.org>
