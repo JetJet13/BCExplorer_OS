@@ -740,19 +740,33 @@ for each in parseList:
                     outScript_decode = "00"
                     counter += 18
                 else: # ------------------------- OP_RETURNS ---------------------------------------------------
-                    OP_length = int(out_type,16)*2
-                    counter += 18
+                    # let's check if the OP_RETURN script length is greater than 255 bytes
+                    if out_type == "fd" and len(access.getrawtransaction(bInfo["tx"][r],1)["vout"][out_num]["scriptPubKey"]["hex"]) > 506:
+                         print "OP_RETURN script length is greater than 255 bytes"
+                         byte_len = tx[counter + 18:counter + 22]
+                         print "out_type", out_type
+                         print "byte_len",byte_len
+                         OP_length = getLitEndian(byte_len)*2
+                         print "OP_length", OP_length
+                         counter += 22
+                    else:
+                        OP_length = int(out_type,16)*2
+                        counter += 18
                     OP_type = tx[counter:counter + 4] # i.e '6A51' == OP_RETURN OP_1 // or // '6A52' == OP_RETURN OP_2 // etc.
-                    OP_stringLen = int(tx[counter + 4:counter + 6],16)*2
+                    OP_stringLen = OP_length - 4 #int(tx[counter + 4:counter + 6],16)*2
                     outScript = tx[counter:counter + 6 + OP_stringLen] # raw script
+                    print "OP_stringLen", OP_stringLen
+                    print "outScript", outScript
                     if OP_type == "6a51":
                         OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                         OP = "OP_RETURN OP_1 "
-                        #print "OP_RETURN OP_1", OP_message
+                        print "OP_RETURN OP_1", OP_message
                     elif OP_type == "6a52":
                         OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                         OP = "OP_RETURN OP_2 "
                         #print "OP_RETURN OP_2", OP_message
+                    else:
+                        raise Exception("OP_type is unknown", OP_type)
                     address = "NonStandard"
                     hash160 = "None"
                     outScript_decode = OP + OP_message
