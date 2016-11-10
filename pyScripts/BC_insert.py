@@ -528,7 +528,7 @@ for each in parseList:
             if input_scriptLen != "fd": # > 255 bytes
                 scriptLen = int(input_scriptLen, 16)*2
                 counter += 74
-            elif input_scriptLen == "fd" and len(access.getrawtransaction(bInfo["tx"][r],1)["vin"][i]["scriptSig"]["hex"]) > 506:
+            elif input_scriptLen == "fd" and len(access.getrawtransaction(bInfo["tx"][r],1)["vin"][i]["scriptSig"]["hex"]) >= 506:
                 # 0xfd = 253 in decimal and so 253*2 = 506
                 scriptLen = getLitEndian(tx[counter + 74:counter + 78])*2
                 counter += 78
@@ -592,6 +592,18 @@ for each in parseList:
                     outScript_decode = "00"
                     counter += 18
                 else: # ------------------------- OP_RETURNS ---------------------------------------------------
+			# let's check if the OP_RETURN script length is >= 255 bytes
+                    if out_type == "fd" and len(access.getrawtransaction(bInfo["tx"][r],1)["vout"][out_num]["scriptPubKey"]["hex"]) >= 506:
+                         print "OP_RETURN script length is greater than 255 bytes"
+                         byte_len = tx[counter + 18:counter + 22]
+                         print "out_type", out_type
+                         print "byte_len",byte_len
+                         OP_length = getLitEndian(byte_len)*2
+                         print "OP_length", OP_length
+                         counter += 22
+                    else:
+                        OP_length = int(out_type,16)*2
+			counter += 18
                     OP_length = int(out_type,16)*2
                     counter += 18
                     OP_type = tx[counter:counter + 4] # i.e '6A51' == OP_RETURN OP_1 // or // '6A52' == OP_RETURN OP_2 // etc.
