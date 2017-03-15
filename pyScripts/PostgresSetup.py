@@ -1,13 +1,12 @@
+import logging
 import psycopg2
 from bitcoinrpc.authproxy import AuthServiceProxy
 import simplejson as json
 
-access = AuthServiceProxy("http://<user>:<pass>@127.0.0.1:2240")
-postgres = psycopg2.connect(database="bcexchange", user="<username>",port=5432, password="<password>")
+from settings import get_settings
 
-cursor = postgres.cursor()
 
-def CreateTablesAndTriggers():
+def CreateTablesAndTriggers(cursor, postgres):
 
     cursor.execute("""CREATE TABLE address_bkc
     (
@@ -235,7 +234,8 @@ def CreateTablesAndTriggers():
       RETURNS trigger AS
     $BODY$
     BEGIN
-    PERFORM pg_notify('address_update', json_build_object('table', TG_TABLE_NAME, 'old_info', OLD, 'info', NEW, 'type', TG_OP)::text);
+    PERFORM pg_notify('address_update', json_build_object('table', TG_TABLE_NAME,
+    'old_info', OLD, 'info', NEW, 'type', TG_OP)::text);
     RETURN NEW;
     END;
     $BODY$
@@ -245,7 +245,8 @@ def CreateTablesAndTriggers():
       RETURNS trigger AS
     $BODY$
     BEGIN
-    PERFORM pg_notify('block_insert', json_build_object('table', TG_TABLE_NAME, 'info', NEW, 'type', TG_OP)::text);
+    PERFORM pg_notify('block_insert', json_build_object('table', TG_TABLE_NAME,
+    'info', NEW, 'type', TG_OP)::text);
     RETURN NEW;
     END;
     $BODY$
@@ -256,7 +257,8 @@ def CreateTablesAndTriggers():
     $BODY$
     BEGIN
     IF TG_OP = 'INSERT' AND NEW.height = -1 THEN
-    PERFORM pg_notify('unconfirmed_tx_insert', json_build_object('table', TG_TABLE_NAME, 'info', NEW, 'type', TG_OP)::text);
+    PERFORM pg_notify('unconfirmed_tx_insert', json_build_object('table', TG_TABLE_NAME,
+    'info', NEW, 'type', TG_OP)::text);
     END IF;
     RETURN NEW;
     END;
@@ -266,7 +268,8 @@ def CreateTablesAndTriggers():
     cursor.execute("""CREATE OR REPLACE FUNCTION table_update_notify()
       RETURNS trigger AS
     $BODY$BEGIN
-    PERFORM pg_notify('table_update', json_build_object('table', TG_TABLE_NAME, 'info', NEW, 'type', TG_OP)::text);
+    PERFORM pg_notify('table_update', json_build_object('table', TG_TABLE_NAME,
+    'info', NEW, 'type', TG_OP)::text);
     RETURN NEW;
     END;
     $BODY$
@@ -307,48 +310,88 @@ def CreateTablesAndTriggers():
 
     postgres.commit()
 
-def InsertIntoChartInfo():
+def InsertIntoChartInfo(cursor, postgres):
     size_list = []
     diff_list = []
     block_list = []
     numtx_list = []
     cd_list = []
     mint_list = []
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('size_chart',size_list, ))
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('diff_chart',diff_list, ))
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('block_chart',block_list, ))
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('numtx_chart',numtx_list, ))
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('cd_chart',cd_list, ))
-    cursor.execute("INSERT INTO chart_info (id,data) VALUES (%s,%s);",('mint_chart',mint_list, ))
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('size_chart',size_list, )
+    )
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('diff_chart',diff_list, )
+    )
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('block_chart',block_list, )
+    )
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('numtx_chart',numtx_list, )
+    )
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('cd_chart',cd_list, )
+    )
+    cursor.execute(
+        "INSERT INTO chart_info (id,data) VALUES (%s,%s);",('mint_chart',mint_list, )
+    )
     postgres.commit()
 
 
-print "Creating tables and triggers"
-CreateTablesAndTriggers()
-print "Finished creating tables and triggers"
-print "Finishing up..."
-InsertIntoChartInfo()
+def main():
+    conf = get_settings()
 
-getInfo = access.getinfo()
+    logger = logging.getLogger('postgres_setup')
 
-networkInfo = {
-                "height":getInfo["blocks"],
-                "moneysupply":getInfo["moneysupply"],
-                "connections":getInfo["connections"]
-}
-print networkInfo
-# insert the network info into database
-insert_network_info = """INSERT INTO networkinfo (id, height, moneysupply, connections) VALUES (%s, %s, %s, %s);"""
-insert_network_data = ("network status", networkInfo["height"], networkInfo["moneysupply"], networkInfo["connections"], )
-cursor.execute(insert_network_info,insert_network_data)
+    access = AuthServiceProxy("http://{}:{}@127.0.0.1:2240".format(
+        conf['daemon_rpc']['username'],
+        conf['damone_rpc']['password']
+    ))
+    postgres = psycopg2.connect(
+        database=conf['database']['database_name'],
+        user=conf['database']['username'],
+        port=5432,
+        password=conf['database']['password']
+    )
 
-# insert the single status page row 
-statuspage_cmd = """INSERT INTO statuspage (id, info) VALUES (%s,%s);"""
-statuspage_data = ("status info", json.dumps(getInfo), )
-cursor.execute(statuspage_cmd,statuspage_data)
+    cursor = postgres.cursor()
 
-postgres.commit()
+    logger.info("Creating tables and triggers")
+    CreateTablesAndTriggers(cursor, postgres)
+    logger.info("Finished creating tables and triggers")
+    logger.info("Finishing up...")
+    InsertIntoChartInfo(cursor, postgres)
 
-cursor.close()
-postgres.close()
-print "All done. PostgresSetup completed successfully."
+    getInfo = access.getinfo()
+
+    networkInfo = {
+        "height": getInfo["blocks"],
+        "moneysupply": getInfo["moneysupply"],
+        "connections": getInfo["connections"]
+    }
+    logger.info(networkInfo)
+    # insert the network info into database
+    insert_network_info = (
+        """INSERT INTO networkinfo (id, height, moneysupply, connections)
+        VALUES (%s, %s, %s, %s);"""
+    )
+    insert_network_data = (
+        "network status", networkInfo["height"], networkInfo["moneysupply"],
+        networkInfo["connections"],
+    )
+    cursor.execute(insert_network_info, insert_network_data)
+
+    # insert the single status page row
+    statuspage_cmd = """INSERT INTO statuspage (id, info) VALUES (%s,%s);"""
+    statuspage_data = ("status info", json.dumps(getInfo), )
+    cursor.execute(statuspage_cmd,statuspage_data)
+
+    postgres.commit()
+
+    cursor.close()
+    postgres.close()
+    logger.info("All done. PostgresSetup completed successfully.")
+
+
+if __name__ == '__main__':
+    main()
