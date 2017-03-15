@@ -27,13 +27,7 @@ Before we get into setup and installation, let's layout the requirements and too
 
 
 #### Python Dependencies
-+ [Bitstring](https://pypi.python.org/pypi/bitstring/3.1.3)
-+ [python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
-  * Install with pip for stable version `pip install git+https://github.com/jgarzik/python-bitcoinrpc.git`
-+ [simplejson](https://pypi.python.org/pypi/simplejson/)
-+ [psycopg2](http://initd.org/psycopg/)
-  * If your installing on Linux, you have to install it from [source](http://initd.org/psycopg/docs/install.html#install-from-source)
-
+Defined in `requirements.txt`
 
 ## Setup
 Before you start with the setup, make sure you have installed all the required tools 
@@ -101,6 +95,19 @@ After you have installed PostgreSQL (>=9.4) the first thing we are going to do i
   $ ./psql -d bcexchange -U ENTER_USERNAME
   ```
 
+### Python Setup
+#### Linux Users
+First thing is to create a virtualenv in the root of the BCExplorer_OS directory.  
+```
+$ cd BCExplorer_OS  
+$ virtualenv ve
+```  
+
+
+
+#### Windows Users
+Instructions to follow
+
 ### B&C Exchange Client Setup
 Make sure to download, unzip and install (if your on windows) the B&C Exchange Client before starting this setup.<br/> 
 We need to create a configuration file for the client, so that we can connect to the client and make rpc requests. 
@@ -155,33 +162,26 @@ a break at this point.
 For this part of the setup, we are going to edit some source files to match the settings you created earlier,
 specifically 
 
-1. pyScripts/BC_parserv02.py
-2. pyScripts/BC_insert.py
-3. pyScripts/BC_charts.py
-4. pyScripts/PostgresSetup.py
-5. bin/www
-6. public/api/api_tools.js
+1. bin/www
+2. public/api/api_tools.js
 
 #### Setting Up Credentials
-======
-Before we make any changes, make sure you know your RPC credentials,
-+ rpcuser
-+ rpcpassword
+Open the settings.yaml file and fill in the details.  
 
-and your PostgreSQL user credentials,
-+ username
-+ password
+```angular2html
+daemon_rpc:
+  username: <ENTER_RPC_USERNAME>
+  password: <ENTER_RPC_PASSWORD>
 
-In your favourite IDE, open the six files above and make the following changes.
-###### FIND & REPLACE
-+ `<user>` => rpcuser
-+ `<pass>` => rpcpassword
-+ `<username>` => username
-+ `<password>` => password
+database:
+  database_name: bcexchange
+  username: <ENTER_DATABASE_USERNAME>
+  password: <ENTER_DATABASE_PASSWORD>
+```
 
 #### Setting Up File Paths
 ======
-Next open `/pyScripts/BC_parserv02.py` and `/pyScripts/BC_insert.py` and make the following changes
+Next open `/pyScripts/BC_parser.py` and `/pyScripts/BC_insert.py` and make the following changes
 #### Windows Users
 First you have to comment out or delete lines. <br/>
 ###### BC_insert.py `343`, `344`, `345`
