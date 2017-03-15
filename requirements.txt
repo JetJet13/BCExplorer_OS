@@ -1,0 +1,9 @@
+appdirs
+bitstring
+packaging
+psycopg2
+pyparsing
+python-bitcoinrpc
+pyyaml
+simplejson
+six
