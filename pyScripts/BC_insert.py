@@ -457,542 +457,39 @@ def parse_block(each, x):
         "motions": bMotions,
         "custodians": bCusto
     }
-    # we need a counter/pointer as we decode the transactions, bit by bit
-    if bNumTx > 255:
-        counter = 174
-    else:
-        counter = 170
 
-    # time to decode the transactions in the respected block
-    tx = each
-    for r in range(0, bNumTx):
-        # let's find the transaction type
-        trans = {}
-        h = counter
-        tx_ver = getLitEndian(tx[counter:counter + 8])
-        tx_timestamp = getLitEndian(tx[counter + 8: counter + 16])
-        trans["ver"] = tx_ver
-        trans["timestamp"] = tx_timestamp
-        trans["chain"] = bChain
-        trans["coinstake"] = False
-        trans["coinagedestroyed"] = 0
-        # print("ver,timestamp", tx_ver, tx_timestamp
-        counter += 16
-        # ---------------------------INPUT PARSING----------------------------------------
-        # let's find input count
-        tx_inCount = tx[counter:counter + 2]
-        if tx_inCount != "fd":  # < 255 inputs
-            try:
-                inCount = int(tx_inCount, 16)
-            except ValueError:
-                inCount = 0
-            counter += 2
-        elif tx_inCount == "fd" and len(access.getrawtransaction(bInfo["tx"][r], 1)[
-                                            "vin"]) >= 255:  # > 255 inputs
-            inCount = getLitEndian(tx[counter + 2:counter + 6])
-            counter += 6
-        else:  # the actual hex byte === fd --> exactly 253 inputs
-            inCount = int(tx_inCount, 16)
-            counter += 2
-        trans["in_count"] = inCount
-        trans["inputs"] = []
-        trans["in_total"] = 0
-        trans["JSONinputs"] = []
-        # print("input count",inCount
-        # let's cycle through inputs
-        for i in xrange(0, inCount):
-            input_num = i
-            input_tx = getBigEndian(tx[counter:counter + 64])
-            input_index = tx[counter + 64:counter + 72]
-            input_scriptLen = tx[counter + 72: counter + 74]
-
-            # if input_index == "FF FF FF FF" then the index = -1
-            if input_index == "ffffffff":
-                input_index = -1
-            else:
-                input_index = getLitEndian(input_index)
-            # now we need to check if the input script is > 255 bytes or not
-            if input_scriptLen != "fd":  # > 255 bytes
-                scriptLen = int(input_scriptLen, 16) * 2
-                counter += 74
-            elif input_scriptLen == "fd":
-               try: 
-                   d_hex = len(access.getrawtransaction(bInfo["tx"][r], 1)["vin"][i]["scriptSig"]["hex"] )
-               except IndexError:
-                   continue
-               if d_hex >= 506:
-                   # 0xfd = 253 in decimal and so 253*2 = 506
-                   scriptLen = getLitEndian(tx[counter + 74:counter + 78]) * 2
-                   counter += 78
-            else:  # input_scriptLen == 'fd'
-                scriptLen = int(input_scriptLen, 16) * 2
-                counter += 74
-            input_script = tx[counter:counter + scriptLen]
-            counter += scriptLen
-            # input_sequence is the seperator 'FF FF FF FF' for inputs and outputs
-            input_sequence = tx[counter:counter + 8]
-            counter += 8
-
-            input_details = {
-                "in_num": input_num,
-                "in_tx": input_tx,
-                "in_index": input_index,
-                "in_script": input_script,
-                "address": "",
-                "in_val": 0
-            }
-            trans["inputs"].append(input_details)
-            trans["JSONinputs"].append(Json(input_details))
-            # print("input:num,tx,index,script_len,sequence", input_num, input_tx,
-            # input_index, input_sequence
-
-        # --------------------OUTPUT PARSING------------------------------
-        # let's get output count
-        tx_outCount = tx[counter:counter + 2]
-        # print(tx_outCount
-        if tx_outCount != "fd":  # < 255 outputs
-            try:
-                outCount = int(tx_outCount, 16)
-            except ValueError:
-                outCount = 0
-            counter += 2
-        elif tx_outCount == "fd" and len(access.getrawtransaction(bInfo["tx"][r], 1)[
-                                             "vout"]) >= 255:  # > 255 outputs
-            outCount = getLitEndian(tx[counter + 2:counter + 6])
-            counter += 6
-        else:  # the actual hex byte === fd --> exactly 253 outputs
-            outCount = int(tx_outCount, 16)
-            counter += 2
-        trans["out_count"] = outCount
-        trans["outputs"] = []
-        trans["out_total"] = 0
-        trans["JSONoutputs"] = []
-        trans["out_txs"] = []
-        # print("outCount", outCount
-        # let's cycle through the outputs
-        for o in xrange(0, outCount):
-            out_num = o
-            trans["out_txs"].append('unspent')
-            out_val = tx[counter:counter + 16]
-            out_type = tx[counter + 16:counter + 18]
-            output_Val = getLitEndian(out_val)
-            # print("out:Val,type",out_val,out_type
-            capture_details = True
-            if out_val == "0000000000000000":
-                out_scriptLen = out_type
-                # outScriptLenInt = int(out_scriptLen,16)*2
-                # counter += 18 + outScriptLenInt
-                if out_scriptLen == "00":
-                    output_type = "None"
-                    address = "None"
-                    hash160 = "None"
-                    outScript = "00"
-                    outScript_decode = "00"
-                    counter += 18
-                else:  # ------------- OP_RETURNS ---------------------
-                    # let's check if the OP_RETURN script length is >= 255 bytes
-                    if out_type == "fd" and len(
-                            access.getrawtransaction(bInfo["tx"][r], 1)["vout"][out_num][
-                                "scriptPubKey"]["hex"]) >= 506:
-                        print("OP_RETURN script length is greater than 255 bytes")
-                        byte_len = tx[counter + 18:counter + 22]
-                        print("out_type", out_type)
-                        print("byte_len", byte_len)
-                        OP_length = getLitEndian(byte_len) * 2
-                        print("OP_length", OP_length)
-                        counter += 22
-                    else:
-                        OP_length = int(out_type, 16) * 2
-                        counter += 18
-                    OP_length = int(out_type, 16) * 2
-                    counter += 18
-                    OP_type = tx[
-                              counter:counter + 4]  # i.e '6A51' == OP_RETURN OP_1 // or // '6A52' == OP_RETURN OP_2 // etc.
-                    OP_stringLen = int(tx[counter + 4:counter + 6], 16) * 2
-                    OP = ''
-                    OP_message = ''
-                    outScript = tx[counter:counter + 6 + OP_stringLen]  # raw script
-                    if OP_type == "6a51":
-                        OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
-                        OP = "OP_RETURN OP_1 "
-                        # print("OP_RETURN OP_1", OP_message
-                    elif OP_type == "6a52":
-                        OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
-                        OP = "OP_RETURN OP_2 "
-                        # print("OP_RETURN OP_2", OP_message
-                    address = "NonStandard"
-                    hash160 = "None"
-                    outScript_decode = OP + OP_message
-                    output_type = "NonStandard"
-                    counter += OP_length
-            else:  # there is some value being received
-                # print(output_Val,"BKC")
-                if out_type == "19":  # P2PH
-                    outScript = tx[counter + 18:counter + 68]
-                    outScript_decode = (
-                        "OP_DUP OP_HASH160 " +
-                        tx[counter + 24:counter + 64] +
-                        " OP_EQUALVERIFY OP_CHECKSIG"
-                    )
-                    address = tx[counter + 24:counter + 64]
-                    hash160 = tx[counter + 24:counter + 64]
-                    output_type = "pubkeyhash"
-                    counter += 68
-                elif out_type == "17":  # multi-sig output
-                    outScript = tx[counter + 20:counter + 66]
-                    outScript_decode = "OP_HASH160 " + tx[
-                                                       counter + 22:counter + 62] + " OP_EQUAL"
-                    address = tx[counter + 22:counter + 62]
-                    hash160 = tx[counter + 22:counter + 62]
-                    output_type = "p2sh"
-                    counter += 64
-                elif out_type == "23":  # P2P
-                    outScript = tx[counter + 20:counter + 88]
-                    outScript_decode = tx[counter + 20:counter + 86] + " OP_CHECKSIG"
-                    address = tx[counter + 20:counter + 86]
-                    hash160 = getHash160(tx[counter + 20:counter + 86])
-                    output_type = "pubkey"
-                    counter += 88
-                elif out_type == "43":  # P2P
-                    outScript = tx[counter + 20:counter + 152]
-                    outScript_decode = tx[counter + 20:counter + 150] + " OP_CHECKSIG"
-                    address = tx[counter + 20:counter + 150]
-                    hash160 = getHash160(tx[counter + 20:counter + 150])
-                    output_type = "pubkey"
-                    counter += 152
-                else:
-                    print("Unknown address type", out_type)
-                    counter += 18
-                    if out_type:
-                        if out_type == 'fd':
-                            script_len = int(tx[counter:counter+6], 16)
-                            counter += 6 + script_len
-                        elif out_type == 'fe':
-                            script_len = int(tx[counter:counter+10], 16)
-                            counter += 10 + script_len
-                        elif out_type == 'ff':
-                            script_len = int(tx[counter:counter+18], 16)
-                            counter += 18 + script_len
-                        else:
-                            script_len = int(out_type, 16)
-                            counter += script_len 
-                        	
-                    
-
-            output_details = {
-                "out_num": out_num,
-                "out_val": output_Val,
-                "address": address,
-                "hash160": hash160,
-                "script": {
-                    "raw": outScript,
-                    "decode": outScript_decode
-                },
-                "type": output_type
-            }
-            trans["out_total"] += output_Val
-            trans["outputs"].append(output_details)
-
-            # block solved by no one in genesis block
-            if r == 0 and o == 0 and bHeight == 0:
-                block["solvedby"] = "None"
-            # block solved by 2nd output in 2nd transaction of block
-            elif r == 1 and o == 1 and bType == "proof-of-stake":
-                block["solvedby"] = getAddress(address, "38")
-                trans["coinstake"] = True
-                trans["coinagedestroyed"] = bCoinageDestroyed
-            # block solved by 1st output in 1st transaction of block
-            elif r == 0 and o == 0 and bType == "proof-of-work":
-                block["solvedby"] = getAddress(address, "38")
-
-        if r == bNumTx - 1:  # the last transaction in the block; it's succeded by a block-end-script
-            lockTime = tx[counter:counter + 8]
-            if lockTime != "00000000":
-                print(tx[h:counter + 10])
-                print("Locktime is off!")
-                return
-            tx_type = tx[counter + 8:counter + 10]
-            tx_hash = computeTransHash(tx[h:counter + 10])
-            endScriptLen = tx[counter + 10:counter + 12]
-            endScriptLen_int = int(endScriptLen, 16) * 2
-            endScript = tx[counter + 12:counter + 12 + endScriptLen_int]
-            counter += 12 + endScriptLen_int
-            # print("locktime,tx_type", lockTime, tx_type)
-        else:  # not the last transaction in the block
-            lockTime = tx[counter:counter + 8]
-            tx_type = tx[counter + 8:counter + 10]
-            counter += 10
-            tx_hash = computeTransHash(tx[h:counter])
-            # print("locktime,tx_type", lockTime, tx_type)
-        trans["id"] = tx_hash
-        trans["type"] = tx_type
-        trans["blockhash"] = bHash
-        trans["blockheight"] = bHeight
-        trans["tx_num"] = r
-        trans["addresses"] = set()
-
-        # block information
-        if tx_type == "38":
-            block["numTx_bks"] += 1
-            block["tx_received_bks"] += trans["out_total"]
-        else:
-            block["numTx_bkc"] += 1
-            block["tx_received_bkc"] += output_Val
-
-        # save the transaction
-        tx_hash = trans["id"]
-        cursor.execute("SELECT height FROM transactions WHERE id = %s;", (tx_hash,))
-        if cursor.rowcount == 0:
-            tx_type = trans["type"]
-            tx_inCount = trans["in_count"]
-            tx_outCount = trans["out_count"]
-            tx_chain = trans["chain"]
-            if tx_type == "38":
-                address_type = "BKS"
-            else:
-                address_type = "BKC"
-
-            for o in xrange(0, tx_outCount):
-                try:
-                    output_type = trans["outputs"][o]["type"]
-                except IndexError:
-                    continue 
-                if output_type == "pubkey":
-                    trans["outputs"][o]["address"] = getAddress(
-                        trans["outputs"][o]["address"],
-                        tx_type)
-                    trans["addresses"].add(trans["outputs"][o]["address"])
-                elif output_type == "pubkeyhash":
-                    trans["outputs"][o]["address"] = getAddress20byte(
-                        trans["outputs"][o]["address"], tx_type)
-                    trans["addresses"].add(trans["outputs"][o]["address"])
-                elif output_type == "p2sh":
-                    trans["outputs"][o]["address"] = getAddress20byteP2SH(
-                        trans["outputs"][o]["address"], tx_type)
-                    trans["addresses"].add(trans["outputs"][o]["address"])
-                trans["JSONoutputs"].append(Json(trans["outputs"][o]))
-                if trans["outputs"][o]["address"] != "None" and trans["outputs"][o][
-                    "address"] != "NonStandard" and tx_chain == 'main':
-                    if address_type == "BKS":
-                        check_address = "SELECT id FROM address_bks WHERE id = %s LIMIT 1;"
-                    else:  # BKC
-                        check_address = "SELECT id FROM address_bkc WHERE id = %s LIMIT 1;"
-                    check_data = (trans["outputs"][o]["address"],)
-                    cursor.execute(check_address, check_data)
-                    if cursor.rowcount == 0:
-                        if address_type == "BKS":
-                            insert_address = "INSERT INTO address_bks (id, hash160, numtx, " \
-                                             "total_sent, total_received, \
-                                                                                 balance," \
-                                             "type) VALUES (%s,%s,%s,%s,%s,%s,%s);"
-                        else:  # BKC
-                            insert_address = "INSERT INTO address_bkc (id, hash160, numtx, " \
-                                             "total_sent, total_received, \
-                                                                                 balance," \
-                                             "type) VALUES (%s,%s,%s,%s,%s,%s,%s);"
-                        insert_address_data = (trans["outputs"][o]["address"],
-                                               trans["outputs"][o]["hash160"],
-                                               0,
-                                               0,
-                                               trans["outputs"][o]["out_val"],
-                                               trans["outputs"][o]["out_val"],
-                                               address_type,)
-                        cursor.execute(insert_address, insert_address_data)
-                        postgres.commit()
-                    else:
-                        if address_type == "BKS":
-                            update_address_out = "UPDATE address_bks SET total_received = " \
-                                                 "total_received + %s,\
-                                                                                         balance = balance + %s WHERE id = %s;"
-                        else:  # BKC
-                            update_address_out = "UPDATE address_bkc SET total_received = " \
-                                                 "total_received + %s,\
-                                                                                       balance = balance + %s WHERE id = %s;"
-                        update_address_out_data = (trans["outputs"][o]["out_val"],
-                                                   trans["outputs"][o]["out_val"],
-                                                   trans["outputs"][o]["address"],)
-                        cursor.execute(update_address_out, update_address_out_data)
-                        postgres.commit()
-
-            insert_input_tx = "INSERT INTO input_txs (input_tx, input_index, txhash) VALUES" \
-                              " (%s, %s, %s);"
-            for i in xrange(0, tx_inCount):
-                try:
-                    n = trans["inputs"][i]
-                except IndexError:
-                    continue
-                if n["in_index"] == -1:
-                    n["address"] = "Coinbase"
-                    n["in_val"] = 0
-
-                else:
-                    insert_input_data = (n["in_tx"], n["in_index"], tx_hash,)
-                    try:
-                        cursor.execute(insert_input_tx, insert_input_data)
-                    except psycopg2.DataError as e:
-                        print('error saving transaction input: {}'.format(e))
-                    postgres.commit()
-                    # print("input tran.",n["in_tx"]
-                    # now let's find input addresses and amounts
-                    input_tx = n["in_tx"]
-                    input_index = n["in_index"]
-                    # print(input_tx,input_index
-                    d_cursor.execute("SELECT * FROM transactions WHERE id = %s;",
-                                     (input_tx,))
-                    fetch = d_cursor.fetchone()
-                    # print(fetch
-                    if type(fetch) == None:
-                        d_cursor.execute(
-                            "SELECT * FROM orphan_transactions WHERE id = %s;",
-                            (input_tx,))
-                        fetch = d_cursor.fetchone()
-
-                    if fetch:
-                        input_address = fetch["outputs"][input_index]["address"]
-                        input_value = fetch["outputs"][input_index]["out_val"]
-                        n["address"] = input_address
-                        n["in_val"] = input_value
-                        trans["in_total"] += input_value
-                        trans["addresses"].add(input_address)
-
-                    # now let's update the fetched transaction for out_txs
-                    if tx_chain == 'main':
-                        try:
-                            cursor.execute(
-                                "UPDATE transactions SET out_txs[%s] = %s WHERE id = %s;",
-                                (input_index + 1, tx_hash, input_tx,)
-                            )
-                        except psycopg2.DataError as e:
-                            print('error updating transaction: {}'.format(e))
-                        postgres.commit()
-                    elif tx_chain == 'orphan':
-                        cursor.execute(
-                            "UPDATE orphan_transactions SET out_txs[%s] = %s WHERE id = %s;",
-                            (input_index + 1, tx_hash, input_tx,))
-                        postgres.commit()
-
-                    if n["address"] != "Coinbase" and tx_chain == 'main':
-                        if address_type == "BKS":
-                            update_address_in = "UPDATE address_bks SET total_sent = " \
-                                                "total_sent + %s,\
-                                                                                  balance = " \
-                                                "balance - %s WHERE id = %s;"
-                        else:  # BKC
-                            update_address_in = "UPDATE address_bkc SET total_sent = " \
-                                                "total_sent + %s,\
-                                                                                  balance = " \
-                                                "balance - %s WHERE id = %s;"
-                        update_address_in_data = (n["in_val"],
-                                                  n["in_val"],
-                                                  n["address"],)
-                        cursor.execute(update_address_in, update_address_in_data)
-                        postgres.commit()
-
-            if tx_chain == 'main':
-                insert_tx = "INSERT INTO transactions (id, ver, timestamp,\
-                                                                           in_count, inputs, " \
-                            "out_count, tx_num,\
-                                                                   outputs, type, " \
-                            "blockhash, height,chain,addresses,in_total,out_total, out_txs, " \
-                            "coinstake, coinagedestroyed)\
-                                                                    VALUES (%s,%s,%s,%s," \
-                            "%s::jsonb[],%s,%s,%s::jsonb[],%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
-                insert_tx_data = (tx_hash, trans["ver"], trans["timestamp"], tx_inCount,
-                                  trans["JSONinputs"], tx_outCount, trans["tx_num"],
-                                  trans["JSONoutputs"],
-                                  tx_type, trans["blockhash"], trans["blockheight"],
-                                  trans["chain"],
-                                  set2list(trans["addresses"]), trans["in_total"],
-                                  int(trans["out_total"]), trans["out_txs"],
-                                  trans["coinstake"],
-                                  trans["coinagedestroyed"],)
-                try:
-                    cursor.execute(insert_tx, insert_tx_data)
-                except psycopg2.DataError as e:
-                    print('error saving transaction: {}'.format(e))
-                postgres.commit()
-                print("MAIN - just inserted,", tx_hash)
-            else:
-                cursor.execute("SELECT height FROM orphan_transactions WHERE id = %s;",
-                               (tx_hash,))
-                if cursor.rowcount == 0:
-                    insert_tx = "INSERT INTO orphan_transactions (id, ver, timestamp,\
-                                                                           in_count, inputs, " \
-                                "out_count, tx_num,\
-                                                                   outputs, type, " \
-                                "blockhash, height,chain,addresses,in_total,out_total, " \
-                                "out_txs, coinstake, coinagedestroyed)\
-                                                                    VALUES (%s,%s,%s,%s," \
-                                "%s::jsonb[],%s,%s,%s::jsonb[],%s,%s,%s,%s,%s,%s,%s,%s,%s," \
-                                "%s);"
-
-                    insert_tx_data = (
-                    tx_hash, trans["ver"], trans["timestamp"], tx_inCount,
-                    trans["JSONinputs"], tx_outCount, trans["tx_num"],
-                    trans["JSONoutputs"],
-                    tx_type, trans["blockhash"], trans["blockheight"],
-                    trans["chain"],
-                    set2list(trans["addresses"]), trans["in_total"],
-                    trans["out_total"], trans["out_txs"], trans["coinstake"],
-                    trans["coinagedestroyed"],)
-                    cursor.execute(insert_tx, insert_tx_data)
-                    postgres.commit()
-                    print("ORPHAN just inserted,", tx_hash)
-            if tx_chain == 'main':
-                for x in trans["addresses"]:
-                    if address_type == "BKS":
-                        update_numtx = "UPDATE address_bks SET numtx = numtx + 1 WHERE id = " \
-                                       "%s;"
-                    else:  # BKC
-                        update_numtx = "UPDATE address_bkc SET numtx = numtx + 1 WHERE id =" \
-                                       " %s;"
-                    update_numtx_data = (x,)
-                    cursor.execute(update_numtx, update_numtx_data)
-                    postgres.commit()
-
-            # hashtype table insert transaction
-            insert_hash = "INSERT INTO hashtype (id, type, height, timestamp, chain) VALUES " \
-                          "(%s, %s, %s, %s, %s);"
-            insert_hash_data = (
-                tx_hash, "tx_" + tx_type, trans["blockheight"], trans["timestamp"],
-                trans["chain"],)
-            cursor.execute(insert_hash, insert_hash_data)
-            postgres.commit()
+    tx_index = 0
+    for tx in block['txs']:
+        parse_transaction(tx, tx_index, block)
+        tx_index += 1
 
     # save the block
     chain = block["chain"]
     bHash = block["id"]
     if chain == 'main':
-        cursor.execute("SELECT height FROM blocks where id = %s;", (bHash,))
+        cursor.execute(
+            "SELECT height FROM blocks where id = %s;",
+            (bHash,)
+        )
         if cursor.rowcount == 0:
-            insert_block = "INSERT INTO blocks (id, height, size, ver, timestamp, bits, " \
-                           "difficulty,\
-                                                            nonce, merkleroot, prevhash, " \
-                           "type, chain, numtx,\
-                                                            proofhash, modifier, " \
-                           "modifierchecksum, mint, vote, tx_received_bks, solvedby, \
-                                                            tx_received_bkc, numtx_bks, " \
-                           "numtx_bkc, coinagedestroyed, txs, motions, custodians)\
-                                                            VALUES (%s, %s, %s, %s, %s, %s, " \
-                           "%s, \
-                                                                    %s, %s, %s, %s, %s, %s, \
-                                                                    %s, %s, %s, %s, %s, %s, " \
-                           "%s, \
-                                                                    %s, %s, %s, %s, %s, %s, " \
-                           "%s);"
+            insert_block = (
+                "INSERT INTO blocks (id, height, size, ver, timestamp, bits, difficulty, "
+                "nonce, merkleroot, prevhash, nexthash, type, chain, numtx, proofhash, modifier, "
+                "modifierchecksum, mint, vote, tx_received_bks, solvedby, "
+                "tx_received_bkc, numtx_bks, numtx_bkc, coinagedestroyed, txs, motions, "
+                "custodians) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+                "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            )
             insert_data = (
                 block["id"], block["height"], block["size"], block["ver"],
-                block["timestamp"], block["bits"],
-                block["difficulty"],
-                block["nonce"], block["merkleroot"], block["prevhash"], block["type"],
-                block["chain"], block["numTx"],
-                block["proofhash"], block["modifier"], block["modifierchecksum"],
-                block["mint"],
-                json.dumps(block["vote"]), block["tx_received_bks"],
-                block["solvedby"], block["tx_received_bkc"], block["numTx_bks"],
-                block["numTx_bkc"],
-                block["coinagedestroyed"], block["txs"], block["motions"],
-                block["custodians"],)
+                block["timestamp"], block["bits"], block["difficulty"], block["nonce"],
+                block["merkleroot"], block["prevhash"], block["nexthash"], block["type"],
+                block["chain"], block["numTx"], block["proofhash"], block["modifier"],
+                block["modifierchecksum"], block["mint"], json.dumps(block["vote"]),
+                block["tx_received_bks"], block["solvedby"], block["tx_received_bkc"],
+                block["numTx_bks"], block["numTx_bkc"], block["coinagedestroyed"],
+                block["txs"], block["motions"], block["custodians"]
+            )
             print("inserting %s on chain: %s" % (x, chain))
             try:
                 cursor.execute(insert_block, insert_data)
@@ -1000,48 +497,328 @@ def parse_block(each, x):
                 print('error saving block'.format(e))
             postgres.commit()
     elif chain == "orphan":
-        cursor.execute("SELECT height FROM orphan_blocks where id = %s;", (bHash,))
+        cursor.execute(
+            "SELECT height FROM orphan_blocks where id = %s;",
+            (bHash,)
+        )
         if cursor.rowcount == 0:
-            insert_block = "INSERT INTO orphan_blocks (id, height, size, ver, timestamp, " \
-                           "bits, difficulty,\
-                                                            nonce, merkleroot, prevhash, " \
-                           "type, chain, numtx,\
-                                                            proofhash, modifier, " \
-                           "modifierchecksum, mint, vote, tx_received_bks, solvedby, \
-                                                            tx_received_bkc, numtx_bks, " \
-                           "numtx_bkc, coinagedestroyed, txs, motions, custodians)\
-                                                            VALUES (%s, %s, %s, %s, %s, %s, " \
-                           "%s, \
-                                                                    %s, %s, %s, %s, %s, %s, \
-                                                                    %s, %s, %s, %s, %s, %s, " \
-                           "%s, \
-                                                                    %s, %s, %s, %s, %s, %s, " \
-                           "%s);"
-
+            insert_block = (
+                "INSERT INTO orphan_blocks (id, height, size, ver, timestamp, bits, "
+                "difficulty, nonce, merkleroot, prevhash, nexthash, type, chain, numtx, "
+                "proofhash, modifier, modifierchecksum, mint, vote, tx_received_bks, "
+                "solvedby, tx_received_bkc, numtx_bks, numtx_bkc, coinagedestroyed, txs, "
+                "motions, custodians) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
+                "%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);"
+            )
             insert_data = (
                 block["id"], block["height"], block["size"], block["ver"],
-                block["timestamp"], block["bits"],
-                block["difficulty"],
-                block["nonce"], block["merkleroot"], block["prevhash"], block["type"],
-                block["chain"], block["numTx"],
-                block["proofhash"], block["modifier"], block["modifierchecksum"],
-                block["mint"],
-                json.dumps(block["vote"]), block["tx_received_bks"],
-                block["solvedby"], block["tx_received_bkc"], block["numTx_bks"],
-                block["numTx_bkc"],
-                block["coinagedestroyed"], block["txs"], block["motions"],
-                block["custodians"],)
+                block["timestamp"], block["bits"], block["difficulty"], block["nonce"],
+                block["merkleroot"], block["prevhash"], block['nexthash'], block["type"],
+                block["chain"], block["numTx"], block["proofhash"], block["modifier"],
+                block["modifierchecksum"], block["mint"], json.dumps(block["vote"]),
+                block["tx_received_bks"], block["solvedby"], block["tx_received_bkc"],
+                block["numTx_bks"], block["numTx_bkc"], block["coinagedestroyed"],
+                block["txs"], block["motions"], block["custodians"]
+            )
             print("inserting %s on chain: %s" % (x, chain))
             cursor.execute(insert_block, insert_data)
             postgres.commit()
 
     # hashtype table insert block
-    insert_hash = "INSERT INTO hashtype (id, type, height, timestamp, chain) VALUES (%s, " \
-                  "%s, %s, %s, %s);"
+    insert_hash = (
+        "INSERT INTO hashtype (id, type, height, timestamp, chain) "
+        "VALUES (%s, %s, %s, %s, %s);"
+    )
     insert_hash_data = (
-    block["id"], "block", block["height"], block["timestamp"], block["chain"],)
+        block["id"], "block", block["height"], block["timestamp"], block["chain"]
+    )
     cursor.execute(insert_hash, insert_hash_data)
     postgres.commit()
+
+
+def parse_transaction(tx, tx_index, block):
+    trans = {}
+    raw_tx = access.getrawtransaction(tx, 1)
+    trans["ver"] = raw_tx.get('version')
+    trans['timestamp'] = raw_tx.get('timestamp')
+    trans["chain"] = block['chain']
+    trans["coinstake"] = False
+    trans["coinagedestroyed"] = 0
+    trans["in_count"] = len(raw_tx.get('vin', []))
+    trans["inputs"] = []
+    trans["in_total"] = 0
+    trans["JSONinputs"] = []
+    vin_n = 0
+    for tx_input in raw_tx.get('vin', []):
+        input_details = {
+            "in_num": vin_n,
+            "in_tx": tx_input.get('txid', ''),
+            "in_index": tx_input.get('sequence', ''),
+            "in_script": tx_input.get('scriptSig', {'hex': ''}).get('hex'),
+            "address": "",
+            "in_val": 0
+        }
+        if tx_input.get('coinbase'):
+            tx_input["address"] = "Coinbase"
+        vin_n += 1
+        trans["inputs"].append(input_details)
+        trans["JSONinputs"].append(json.dumps(input_details))
+
+    trans["out_count"] = len(raw_tx.get('vout', []))
+    trans["outputs"] = []
+    trans["out_total"] = 0
+    trans["JSONoutputs"] = []
+    trans["out_txs"] = []
+    for tx_output in raw_tx.get('vout', []):
+        trans["out_txs"].append('unspent')
+        tx_n = tx_output.get('n', -1)
+        script_pub_key = tx_output.get('scriptPubKey')
+        output_details = {
+            "out_num": tx_n,
+            "out_val": tx_output.get('value', 0),
+            "address": script_pub_key.get('addresses', [''])[0],
+            "hash160": '',
+            "script": {
+                "raw": script_pub_key.get('hex', ''),
+                "decode": script_pub_key.get('asm', '')
+            },
+            "type": script_pub_key.get('type', '')
+        }
+        trans["out_total"] += tx_output.get('value', 0)
+        trans["outputs"].append(output_details)
+
+        # block solved by no one in genesis block
+        if tx_index == 0 and tx_n == 0 and block["height"] == 0:
+            block["solvedby"] = "No-one"
+        # block solved by 2nd output in 2nd transaction of block
+        elif tx_index == 1 and tx_n == 1 and block["type"] == "proof-of-stake":
+            block["solvedby"] = script_pub_key.get('addresses', [''])[0]
+            trans["coinstake"] = True
+            trans["coinagedestroyed"] = block["coinagedestroyed"]
+        # block solved by 1st output in 1st transaction of block
+        elif tx_index == 0 and tx_n == 0 and block["type"] == "proof-of-work":
+            block["solvedby"] = script_pub_key.get('addresses', [''])[0]
+
+    trans["id"] = raw_tx.get('txid')
+    trans["type"] = raw_tx.get('unit')
+    trans["blockhash"] = raw_tx.get('blockhash')
+    trans["blockheight"] = block['height']
+    trans["tx_num"] = tx_index
+    trans["addresses"] = set()
+
+    # block information
+    if trans["type"] == "8":
+        block["numTx_bks"] += 1
+        block["tx_received_bks"] += trans["out_total"]
+    else:
+        block["numTx_bkc"] += 1
+        block["tx_received_bkc"] += trans["out_total"]
+
+    # save the transaction
+    tx_hash = trans["id"]
+    cursor.execute("SELECT height FROM transactions WHERE id = %s;", (tx_hash,))
+    if cursor.rowcount == 0:
+        tx_type = trans["type"]
+        tx_inCount = trans["in_count"]
+        tx_outCount = trans["out_count"]
+        tx_chain = trans["chain"]
+        if tx_type == "8":
+            address_type = "BKS"
+        else:
+            address_type = "BKC"
+
+        for tx_output in trans["outputs"]:
+            trans["addresses"].add(tx_output["address"])
+            trans["JSONoutputs"].append(json.dumps(tx_output))
+            if (
+                tx_output["address"] != "None" and
+                tx_output["address"] != "NonStandard" and
+                tx_chain == 'main'
+            ):
+                if address_type == "BKS":
+                    cursor.execute(
+                        "SELECT id FROM address_bks WHERE id = %s LIMIT 1;",
+                        (tx_output['address'],)
+                    )
+                else:  # BKC
+                    cursor.execute(
+                        "SELECT id FROM address_bkc WHERE id = %s LIMIT 1;",
+                        (tx_output['address'],)
+                    )
+                if cursor.rowcount == 0:
+                    if address_type == "BKS":
+                        insert_address = (
+                            "INSERT INTO address_bks (id, hash160, numtx, total_sent, "
+                            "total_received, balance, type) "
+                            "VALUES (%s,%s,%s,%s,%s,%s,%s);"
+                        )
+                    else:  # BKC
+                        insert_address = (
+                            "INSERT INTO address_bkc (id, hash160, numtx, total_sent, "
+                            "total_received, balance, type) "
+                            "VALUES (%s,%s,%s,%s,%s,%s,%s);"
+                        )
+                    insert_address_data = (
+                        tx_output["address"], tx_output["hash160"], 0, 0,
+                        tx_output["out_val"], tx_output["out_val"], address_type
+                    )
+                    cursor.execute(insert_address, insert_address_data)
+                    postgres.commit()
+                else:
+                    if address_type == "BKS":
+                        update_address_out = (
+                            "UPDATE address_bks SET total_received = total_received + %s,"
+                            " balance = balance + %s WHERE id = %s;"
+                        )
+                    else:  # BKC
+                        update_address_out = (
+                            "UPDATE address_bkc SET total_received = total_received + %s,"
+                            " balance = balance + %s WHERE id = %s;"
+                        )
+                    update_address_out_data = (
+                        tx_output["out_val"], tx_output["out_val"], tx_output["address"]
+                    )
+                    cursor.execute(update_address_out, update_address_out_data)
+                    postgres.commit()
+
+        insert_input_tx = (
+            "INSERT INTO input_txs (input_tx, input_index, txhash) VALUES (%s, %s, %s);"
+        )
+        for tx_input in trans['inputs']:
+            insert_input_data = (tx_input["in_tx"], tx_input["in_index"], tx_hash,)
+            try:
+                cursor.execute(insert_input_tx, insert_input_data)
+            except psycopg2.DataError as e:
+                print('error saving transaction input: {}'.format(e))
+            postgres.commit()
+            # now let's find input addresses and amounts
+            input_tx = tx_input["in_tx"]
+            input_index = tx_input["in_index"]
+            # print(input_tx,input_index
+            d_cursor.execute(
+                "SELECT * FROM transactions WHERE id = %s;",
+                (input_tx,))
+            fetch = d_cursor.fetchone()
+            if fetch is None:
+                d_cursor.execute(
+                    "SELECT * FROM orphan_transactions WHERE id = %s;",
+                    (input_tx,))
+                fetch = d_cursor.fetchone()
+
+            if fetch:
+                input_address = fetch["outputs"][input_index]["address"]
+                input_value = fetch["outputs"][input_index]["out_val"]
+                tx_input["address"] = input_address
+                tx_input["in_val"] = input_value
+                trans["in_total"] += input_value
+                trans["addresses"].add(input_address)
+
+            # now let's update the fetched transaction for out_txs
+            if tx_chain == 'main':
+                try:
+                    cursor.execute(
+                        "UPDATE transactions SET out_txs[%s] = %s WHERE id = %s;",
+                        (input_index + 1, tx_hash, input_tx,)
+                    )
+                except psycopg2.DataError as e:
+                    print('error updating transaction: {}'.format(e))
+                postgres.commit()
+            elif tx_chain == 'orphan':
+                cursor.execute(
+                    "UPDATE orphan_transactions SET out_txs[%s] = %s WHERE id = %s;",
+                    (input_index + 1, tx_hash, input_tx,))
+                postgres.commit()
+
+            if tx_input["address"] != "Coinbase" and tx_chain == 'main':
+                if address_type == "BKS":
+                    update_address_in = (
+                        "UPDATE address_bks SET total_sent = total_sent + %s, "
+                        "balance = balance - %s WHERE id = %s;"
+                    )
+                else:  # BKC
+                    update_address_in = (
+                        "UPDATE address_bkc SET total_sent = total_sent + %s,"
+                        "balance = balance - %s WHERE id = %s;"
+                    )
+                update_address_in_data = (
+                    tx_input["in_val"],
+                    tx_input["in_val"],
+                    tx_input["address"]
+                )
+                cursor.execute(update_address_in, update_address_in_data)
+                postgres.commit()
+
+        if tx_chain == 'main':
+            insert_tx = (
+                "INSERT INTO transactions (id, ver, timestamp, in_count, inputs, "
+                "out_count, tx_num, outputs, type, blockhash, height, chain, addresses, "
+                "in_total,out_total, out_txs, coinstake, coinagedestroyed) "
+                "VALUES (%s,%s,%s,%s,%s::jsonb[],%s,%s,%s::jsonb[],%s,%s,%s,%s,%s,"
+                "%s,%s,%s,%s,%s);"
+            )
+            insert_tx_data = (
+                tx_hash, trans["ver"], trans["timestamp"], tx_inCount,
+                trans["JSONinputs"], tx_outCount, trans["tx_num"], trans["JSONoutputs"],
+                tx_type, trans["blockhash"], trans["blockheight"], trans["chain"],
+                set2list(trans["addresses"]), trans["in_total"], int(trans["out_total"]),
+                trans["out_txs"], trans["coinstake"], trans["coinagedestroyed"]
+            )
+            try:
+                cursor.execute(insert_tx, insert_tx_data)
+            except psycopg2.DataError as e:
+                print('error saving transaction: {}'.format(e))
+            postgres.commit()
+            print("MAIN - just inserted tx,", tx_hash)
+        else:
+            cursor.execute(
+                "SELECT height FROM orphan_transactions WHERE id = %s;",
+                (tx_hash,)
+            )
+            if cursor.rowcount == 0:
+                insert_tx = (
+                    "INSERT INTO orphan_transactions (id, ver, timestamp, in_count, "
+                    "inputs, out_count, tx_num, outputs, type, blockhash, height, chain, "
+                    "addresses, in_total, out_total, out_txs, coinstake, "
+                    "coinagedestroyed) VALUES (%s,%s,%s,%s,%s::jsonb[],%s,%s,%s::jsonb[],"
+                    "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);"
+                )
+
+                insert_tx_data = (
+                    tx_hash, trans["ver"], trans["timestamp"], tx_inCount,
+                    trans["JSONinputs"], tx_outCount, trans["tx_num"],
+                    trans["JSONoutputs"], tx_type, trans["blockhash"],
+                    trans["blockheight"], trans["chain"], set2list(trans["addresses"]),
+                    trans["in_total"], trans["out_total"], trans["out_txs"],
+                    trans["coinstake"], trans["coinagedestroyed"]
+                )
+                cursor.execute(insert_tx, insert_tx_data)
+                postgres.commit()
+                print("ORPHAN just inserted,", tx_hash)
+        if tx_chain == 'main':
+            for address in trans["addresses"]:
+                if address_type == "BKS":
+                    update_numtx = (
+                        "UPDATE address_bks SET numtx = numtx + 1 WHERE id = %s;"
+                    )
+                else:  # BKC
+                    update_numtx = (
+                        "UPDATE address_bkc SET numtx = numtx + 1 WHERE id = %s;"
+                    )
+                update_numtx_data = (address,)
+                cursor.execute(update_numtx, update_numtx_data)
+                postgres.commit()
+
+        # hashtype table insert transaction
+        insert_hash = (
+            "INSERT INTO hashtype (id, type, height, timestamp, chain) "
+            "VALUES (%s, %s, %s, %s, %s);"
+        )
+        insert_hash_data = (
+            tx_hash, "tx_" + tx_type, trans["blockheight"], trans["timestamp"],
+            trans["chain"]
+        )
+        cursor.execute(insert_hash, insert_hash_data)
+        postgres.commit()
 
 
 def main():
