@@ -22,10 +22,6 @@ from settings import get_settings
 
 conf = get_settings()
 
-logger = logging.getLogger('insert')
-
-conf = get_settings()
-
 access = AuthServiceProxy("http://{}:{}@127.0.0.1:2240".format(
     conf['daemon_rpc']['username'],
     conf['daemon_rpc']['password']
@@ -36,7 +32,7 @@ postgres = psycopg2.connect(
     port=5432,
     password=conf['database']['password']
 )
-logger.info("Current block count: ", access.getblockcount())
+print("Current block count: ", access.getblockcount())
 cursor = postgres.cursor()
 d_cursor = postgres.cursor(
     cursor_factory=psycopg2.extras.RealDictCursor
@@ -51,7 +47,7 @@ def set2list (aSet):
 
 
 def display_time(seconds):
-    # logger.info("minutes",seconds)
+    # print("minutes",seconds)
     answer = []
     result = ""
     intervals = (('year', 525949), ('month', 43829), ('week', 10080), ('day', 1440), ('hour', 60), ('minute', 1))
@@ -63,16 +59,16 @@ def display_time(seconds):
         if modo != 0:
             if modo > 1:
                 # mojo = str(modo)+" "+each[0]+suffix
-                # logger.info(mojo)
+                # print(mojo)
                 answer.append({"duration": modo, "type": each[0] + suffix})
                 seconds -= interval_sec*rojo
-                logger.info("minutes minus", seconds)
+                print("minutes minus", seconds)
             else:
                 # jojo = str(modo)+" "+each[0]
-                # logger.info(jojo)
+                # print(jojo)
                 answer.append({"duration": modo, "type": each[0]})
                 seconds -= each[1]
-                # logger.info("minutes minus 1",seconds)
+                # print("minutes minus 1",seconds)
     r = 0
     for each in answer:
         dur = each["duration"]
@@ -362,11 +358,11 @@ def main():
     # -------------LET'S CHECK IF THE BLOCKS HAVE CHANGED FROM MAIN TO ORPHAN & VICE VERSA
     blockCount = access.getblockcount()
     getBlocks = blockCount - 280
-    logger.info("Current block count: ", blockCount)
+    print("Current block count: ", blockCount)
     d_cursor.execute("SELECT * FROM blocks WHERE height >= %s;",(getBlocks, ))
     get_fetch = d_cursor.fetchall()
     d_rowCount = d_cursor.rowcount
-    #logger.info(get_fetch)
+    #print(get_fetch)
     for q in range(0, d_rowCount):
         b = get_fetch[q]
         height = b["height"]
@@ -375,23 +371,23 @@ def main():
         txs = b["txs"]
         checkBlock = access.getblockhash(height)
         if checkBlock != hash: # MAIN CHAIN TO ORPHAN CHAIN
-            logger.info("uh-oh block is orphaned",height)
+            print("uh-oh block is orphaned",height)
             get_fetch[q]["chain"] = "orphan"
-            logger.info(hash)
+            print(hash)
             cursor.execute("UPDATE blocks SET chain = 'orphan' WHERE id = %s;", (hash, ))
             postgres.commit()
             cursor.execute("INSERT INTO orphan_blocks SELECT * FROM blocks WHERE id = %s;", (hash, ))
             postgres.commit()
             for z in txs:
-                logger.info(z)
-                logger.info(txs)
+                print(z)
+                print(txs)
                 cursor.execute("UPDATE transactions SET chain = 'orphan' WHERE id = %s;", (z, ))
                 postgres.commit()
                 cursor.execute("INSERT INTO orphan_transactions SELECT * FROM transactions WHERE id = %s;", (z, ))
                 postgres.commit()
                 d_cursor.execute("SELECT * FROM transactions WHERE id = %s;", (z, ))
                 t = d_cursor.fetchone()
-                logger.info(t)
+                print(t)
                 t_type = t["type"]
                 t_outCount = t["out_count"]
                 t_inCount = t["in_count"]
@@ -409,7 +405,7 @@ def main():
                 for q in range(0, t_outCount):
                     out_address = t_outputs[q]["address"]
                     out_val = t_outputs[q]["out_val"]
-                    logger.info(out_address,out_val)
+                    print(out_address,out_val)
                     if out_address != "None" and out_address != "NonStandard":
                         if t_type == '38':
                             cursor.execute("UPDATE address_bks SET total_received = total_received - %s, balance = balance - %s WHERE id = %s;", (out_val, out_val, out_address, ))
@@ -419,7 +415,7 @@ def main():
                 for q in range(0, t_inCount):
                     in_address = t_inputs[q]["address"]
                     in_val = t_inputs[q]["in_val"]
-                    logger.info(in_address,in_val)
+                    print(in_address,in_val)
                     if in_address != "Coinbase":
                         if t_type == '38':
                             cursor.execute("UPDATE address_bks SET total_sent = total_sent - %s, balance = balance + %s WHERE id = %s;", (in_val, in_val, in_address, ))
@@ -432,10 +428,10 @@ def main():
 
             cursor.execute("DELETE FROM blocks WHERE id = %s;", (hash, ))
             postgres.commit()
-            logger.info(checkBlock)
+            print(checkBlock)
             d_cursor.execute("SELECT * FROM orphan_blocks WHERE id = %s;", (checkBlock, ))
             o = d_cursor.fetchone()
-            logger.info(o)
+            print(o)
             o["chain"] = "main"
             o_txs = o["txs"]
             cursor.execute("UPDATE orphan_blocks SET chain = 'main' WHERE id = %s;", (checkBlock, ))
@@ -443,7 +439,7 @@ def main():
             cursor.execute("INSERT INTO blocks SELECT * FROM orphan_blocks WHERE id = %s;", (checkBlock, ))
             postgres.commit()
             for z in o_txs:
-                logger.info(z)
+                print(z)
                 cursor.execute("UPDATE orphan_transactions SET chain = 'main' WHERE id = %s;", (z, ))
                 postgres.commit()
                 cursor.execute("INSERT INTO transactions SELECT * FROM orphan_transactions WHERE id = %s;", (z, ))
@@ -456,7 +452,7 @@ def main():
                 t_outputs = t["outputs"]
                 t_inputs = t["inputs"]
                 t_addresses = t["addresses"]
-                logger.info(t)
+                print(t)
                 for q in range(0, t_outCount):
                     out_address = t_outputs[q]["address"]
                     out_val = t_outputs[q]["out_val"]
@@ -509,8 +505,8 @@ def main():
 
     # ---------------------------------------------------------------------------------------------
     # Linux Users
-    blk01 = "/root/.bcexchange/blk0001.dat"
-    blk02 = "/root/.bcexchange/blk0002.dat"
+    blk01 = "/home/bcex/.bcexchange/blk0001.dat"
+    blk02 = "/home/bcex/.bcexchange/blk0002.dat"
     blk = ""
 
     #  Windows Users
@@ -519,7 +515,7 @@ def main():
     # blk = ""
     if os.path.isfile(blk02):
         blk = blk02
-        logger.info("blk02 found")
+        print("blk02 found")
     else:
         blk = blk01
 
@@ -532,14 +528,14 @@ def main():
     block = hex_data.split(magic_number)
 
     del block[0]  # the first element in the list is blank, so we get rid of it
-    logger.info(len(block))
+    print(len(block))
 
     wed = removeDups(block)  # f7 removes duplicates
-    logger.info(len(wed), "len of wed")
+    print(len(wed), "len of wed")
     del block
 
 
-    logger.info("BlockChain Parsing in Progress...")
+    print("BlockChain Parsing in Progress...")
     start = len(wed) - 8 # latest 8 blocks
     end = len(wed)
     parseList = []
@@ -581,7 +577,7 @@ def main():
         bCusto = []
         bTxs = bInfo["tx"]
         bTimeStamp = getLitEndian(each[144:152]) #timestamp in unix time
-        logger.info(bHeight,bCoinageDestroyed)
+        print(bHeight,bCoinageDestroyed)
         #let's get custodians into a list
         for c in range(0,len(bInfo["vote"]["custodians"])):
             custo = bInfo["vote"]["custodians"][c]["address"]
@@ -662,7 +658,7 @@ def main():
             trans["chain"] = bChain
             trans["coinstake"] = False
             trans["coinagedestroyed"] = 0
-            #logger.info("ver,timestamp", tx_ver, tx_timestamp)
+            #print("ver,timestamp", tx_ver, tx_timestamp)
             counter += 16
             #---------------------------INPUT PARSING----------------------------------------------------
             #let's find input count
@@ -680,7 +676,7 @@ def main():
             trans["inputs"] = []
             trans["in_total"] = 0
             trans["JSONinputs"] = []
-            #logger.info("input count",inCount)
+            #print("input count",inCount)
             #let's cycle through inputs
             for i in xrange(0,inCount):
                 input_num = i
@@ -720,12 +716,12 @@ def main():
                 }
                 trans["inputs"].append(input_details)
                 trans["JSONinputs"].append(Json(input_details))
-                #logger.info("input:num,tx,index,script_len,sequence", input_num, input_tx, input_index, input_sequence)
+                #print("input:num,tx,index,script_len,sequence", input_num, input_tx, input_index, input_sequence)
 
             # -----------------------------OUTPUT PARSING-----------------------------------------------------
             #let's get output count
             tx_outCount = tx[counter:counter+2]
-            #logger.info(tx_outCount)
+            #print(tx_outCount)
             if tx_outCount != "fd": # < 255 outputs
                 outCount = int(tx_outCount,16)
                 counter += 2
@@ -740,7 +736,7 @@ def main():
             trans["out_total"] = 0
             trans["JSONoutputs"] = []
             trans["out_txs"] = []
-            #logger.info("outCount", outCount)
+            #print("outCount", outCount)
             # let's cycle through the outputs
             for o in xrange(0,outCount):
                 out_num = o
@@ -748,7 +744,7 @@ def main():
                 out_val = tx[counter:counter + 16]
                 out_type = tx[counter + 16:counter + 18]
                 output_Val = getLitEndian(out_val)
-                #logger.info("out:Val,type",out_val,out_type)
+                #print("out:Val,type",out_val,out_type)
                 if out_val == "0000000000000000":
                     out_scriptLen = out_type
                     # outScriptLenInt = int(out_scriptLen,16)*2
@@ -763,12 +759,12 @@ def main():
                     else: # ------------------------- OP_RETURNS ---------------------------------------------------
                         # let's check if the OP_RETURN script length is greater than 255 bytes
                         if out_type == "fd" and len(access.getrawtransaction(bInfo["tx"][r],1)["vout"][out_num]["scriptPubKey"]["hex"]) >= 506:
-                             logger.info("OP_RETURN script length is greater than 255 bytes")
+                             print("OP_RETURN script length is greater than 255 bytes")
                              byte_len = tx[counter + 18:counter + 22]
-                             logger.info("out_type", out_type)
-                             logger.info("byte_len",byte_len)
+                             print("out_type", out_type)
+                             print("byte_len",byte_len)
                              OP_length = getLitEndian(byte_len)*2
-                             logger.info("OP_length", OP_length)
+                             print("OP_length", OP_length)
                              counter += 22
                         else:
                             OP_length = int(out_type,16)*2
@@ -776,16 +772,16 @@ def main():
                         OP_type = tx[counter:counter + 4] # i.e '6A51' == OP_RETURN OP_1 // or // '6A52' == OP_RETURN OP_2 // etc.
                         OP_stringLen = OP_length - 4 #int(tx[counter + 4:counter + 6],16)*2
                         outScript = tx[counter:counter + 6 + OP_stringLen] # raw script
-                        logger.info("OP_stringLen", OP_stringLen)
-                        logger.info("outScript", outScript)
+                        print("OP_stringLen", OP_stringLen)
+                        print("outScript", outScript)
                         if OP_type == "6a51":
                             OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                             OP = "OP_RETURN OP_1 "
-                            logger.info("OP_RETURN OP_1", OP_message)
+                            print("OP_RETURN OP_1", OP_message)
                         elif OP_type == "6a52":
                             OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                             OP = "OP_RETURN OP_2 "
-                            #logger.info("OP_RETURN OP_2", OP_message)
+                            #print("OP_RETURN OP_2", OP_message)
                         else:
                             raise Exception("OP_type is unknown", OP_type)
                         address = "NonStandard"
@@ -794,7 +790,7 @@ def main():
                         output_type = "NonStandard"
                         counter += OP_length
                 else: # there is some value being received
-                    #logger.info(output_Val,"BKC")
+                    #print(output_Val,"BKC")
                     if out_type == "19":   #P2PH
                         outScript = tx[counter+18:counter+68]
                         outScript_decode = "OP_DUP OP_HASH160 "+ tx[counter + 24:counter + 64] + " OP_EQUALVERIFY OP_CHECKSIG"
@@ -858,7 +854,7 @@ def main():
             if r == bNumTx - 1: # the last transaction in the block; it's succeded by a block-end-script
                 lockTime = tx[counter:counter + 8]
                 if lockTime != "00000000":
-                    logger.info(tx[h:counter+10])
+                    print(tx[h:counter+10])
                     raise Exception("Locktime is off!")
                 tx_type = tx[counter + 8:counter+10]
                 tx_hash = computeTransHash(tx[h:counter+10])
@@ -866,13 +862,13 @@ def main():
                 endScriptLen_int = int(endScriptLen,16)*2
                 endScript = tx[counter + 12:counter + 12 + endScriptLen_int]
                 counter += 12 + endScriptLen_int
-                #logger.info("locktime,tx_type", lockTime, tx_type)
+                #print("locktime,tx_type", lockTime, tx_type)
             else: # not the last transaction in the block
                 lockTime = tx[counter:counter+8]
                 tx_type = tx[counter + 8:counter+10]
                 counter += 10
                 tx_hash = computeTransHash(tx[h:counter])
-                #logger.info("locktime,tx_type", lockTime, tx_type)
+                #print("locktime,tx_type", lockTime, tx_type)
             trans["id"] = tx_hash
             trans["type"] = tx_type
             trans["blockhash"] = bHash
@@ -891,13 +887,13 @@ def main():
 
 
 
-            #logger.info(tx_hash)
+            #print(tx_hash)
         c += 1
 
 
 
     elapsed_time = time.time() - start_time
-    logger.info("%s seconds for complete blockchain Parse" % elapsed_time)
+    print("%s seconds for complete blockchain Parse" % elapsed_time)
 
     # Let's insert into transaction table'
     for each in transList:
@@ -973,24 +969,25 @@ def main():
                     insert_input_data = (n["in_tx"], n["in_index"], tx_hash, )
                     cursor.execute(insert_input_tx,insert_input_data)
                     postgres.commit()
-            # logger.info("input tran.",n["in_tx"])
+            # print("input tran.",n["in_tx"])
                     # now let's find input addresses and amounts
                     input_tx = n["in_tx"]
                     input_index = n["in_index"]
-                    # logger.info(input_tx,input_index)
+                    # print(input_tx,input_index)
                     d_cursor.execute("SELECT * FROM transactions WHERE id = %s;", (input_tx, ))
                     fetch = d_cursor.fetchone()
-                    # logger.info(fetch)
+                    # print(fetch)
                     if type(fetch) == None:
                         d_cursor.execute("SELECT * FROM orphan_transactions WHERE id = %s;", (input_tx, ))
                         fetch = d_cursor.fetchone()
 
-                    input_address = fetch["outputs"][input_index]["address"]
-                    input_value = fetch["outputs"][input_index]["out_val"]
-                    n["address"] = input_address
-                    n["in_val"] = input_value
-                    each["in_total"] += input_value
-                    each["addresses"].add(input_address)
+                    if fetch:
+                        input_address = fetch["outputs"][input_index]["address"]
+                        input_value = fetch["outputs"][input_index]["out_val"]
+                        n["address"] = input_address
+                        n["in_val"] = input_value
+                        each["in_total"] += input_value
+                        each["addresses"].add(input_address)
 
                     # now let's update the fetched transaction for out_txs
                     if tx_chain == 'main':
@@ -1024,7 +1021,7 @@ def main():
                               set2list(each["addresses"]), each["in_total"], each["out_total"], each["out_txs"],each["coinstake"],each["coinagedestroyed"], )
                 cursor.execute(insert_tx, insert_tx_data)
                 postgres.commit()
-                logger.info("MAIN - just inserted,",tx_hash)
+                print("MAIN - just inserted,",tx_hash)
             else:
                 cursor.execute("SELECT height FROM orphan_transactions WHERE id = %s;", (tx_hash, ))
                 if cursor.rowcount == 0:
@@ -1039,7 +1036,7 @@ def main():
                               set2list(each["addresses"]), each["in_total"], each["out_total"], each["out_txs"],each["coinstake"],each["coinagedestroyed"], )
                      cursor.execute(insert_tx, insert_tx_data)
                      postgres.commit()
-                     logger.info("ORPHAN just inserted,",tx_hash)
+                     print("ORPHAN just inserted,",tx_hash)
             if tx_chain == 'main':
                 for x in each["addresses"]:
                     if address_type == "BKS":
@@ -1076,7 +1073,7 @@ def main():
                            b["nonce"], b["merkleroot"], b["prevhash"], b["type"], b["chain"], b["numTx"],
                            b["proofhash"], b["modifier"], b["modifierchecksum"], b["mint"], json.dumps(b["vote"]), b["tx_received_bks"],
                            b["solvedby"], b["tx_received_bkc"], b["numTx_bks"], b["numTx_bkc"], b["coinagedestroyed"], b["txs"],b["motions"],b["custodians"], )
-                logger.info("inserting %s on chain: %s" % (x,chain))
+                print("inserting %s on chain: %s" % (x,chain))
                 cursor.execute(insert_block,insert_data)
                 postgres.commit()
         elif chain == "orphan":
@@ -1095,7 +1092,7 @@ def main():
                            b["nonce"], b["merkleroot"], b["prevhash"], b["type"], b["chain"], b["numTx"],
                            b["proofhash"], b["modifier"], b["modifierchecksum"], b["mint"], json.dumps(b["vote"]), b["tx_received_bks"],
                            b["solvedby"], b["tx_received_bkc"], b["numTx_bks"], b["numTx_bkc"], b["coinagedestroyed"], b["txs"],b["motions"],b["custodians"], )
-                     logger.info("inserting %s on chain: %s" % (x,chain))
+                     print("inserting %s on chain: %s" % (x,chain))
                      cursor.execute(insert_block,insert_data)
                      postgres.commit()
 
@@ -1114,7 +1111,7 @@ def main():
                     "moneysupply":getInfo["moneysupply"],
                     "connections":getInfo["connections"]
     }
-    logger.info(networkInfo)
+    print(networkInfo)
 
     # insert the network info into database
     # insert_network_info = "INSERT INTO networkinfo (id, height, moneysupply, connections) VALUES (%s, %s, %s, %s);"
@@ -1141,10 +1138,10 @@ def main():
 
     vote_start = vote_tracker_start
     vote_end = vote_tracker_end
-    logger.info("vote_start",vote_start,"vote-end",vote_end)
+    print("vote_start",vote_start,"vote-end",vote_end)
     # custodians
     for x in xrange(vote_start,vote_end):
-        logger.info(vote_end - x,"Custodian more to go")
+        print(vote_end - x,"Custodian more to go")
         getCustodians = access.getcustodianvotes(x)
         for m in getCustodians:
             address = m
@@ -1180,7 +1177,7 @@ def main():
                             d_cursor.execute("SELECT latest_block,numvotes,passed FROM custodians WHERE id = %s;", (id, ))
                             get_prev_info = d_cursor.fetchone()
                             if latest_block > get_prev_info["latest_block"] and numvotes != get_prev_info["numvotes"] and get_prev_info["passed"] == False:
-                                logger.info("updating!")
+                                print("updating!")
                                 if numvotes > get_prev_info["numvotes"]:
                                     cursor.execute("UPDATE custodians SET latest_block = %s, numvotes = %s, sdd = %s \
                                                                        WHERE id = %s;",
@@ -1214,7 +1211,7 @@ def main():
 
     # motions
     for x in xrange(vote_start,vote_end):
-        logger.info(vote_end - x,"Motion more to go")
+        print(vote_end - x,"Motion more to go")
         getMotions = access.getmotions(x)
         for m in getMotions:
             id = m
@@ -1245,10 +1242,10 @@ def main():
                     # let's check if the latest_block is ahead of previous latest_block
                     d_cursor.execute("SELECT latest_block,numvotes,passed FROM motions WHERE id = %s;", (id, ))
                     get_prev_info = d_cursor.fetchone()
-                    logger.info(latest_block,">",get_prev_info["latest_block"])
-                    logger.info(numvotes,">",get_prev_info["numvotes"])
+                    print(latest_block,">",get_prev_info["latest_block"])
+                    print(numvotes,">",get_prev_info["numvotes"])
                     if latest_block > get_prev_info["latest_block"] and numvotes != get_prev_info["numvotes"] and get_prev_info["passed"] == False:
-                        logger.info("updating!")
+                        print("updating!")
                         if numvotes > get_prev_info["numvotes"]:
                             cursor.execute("UPDATE motions SET latest_block = %s, numvotes = %s, sdd = %s \
                                                            WHERE id = %s;",
@@ -1269,11 +1266,11 @@ def main():
         d_cursor.execute("SELECT totalvotes FROM motions WHERE id = %s;", (t, ))
         get_prev_info = d_cursor.fetchone()
         if total_votes > get_prev_info["totalvotes"]:
-            logger.info("updating totalvotes!")
+            print("updating totalvotes!")
             cursor.execute("UPDATE motions SET totalvotes = %s WHERE id = %s;", (total_votes,t, ))
             postgres.commit()
 
-    logger.info("Done")
+    print("Done")
 
 
 if __name__ == '__main__':
