@@ -553,7 +553,7 @@ def parse_transaction(tx, tx_index, block):
         input_details = {
             "in_num": vin_n,
             "in_tx": tx_input.get('txid', ''),
-            "in_index": tx_input.get('sequence', ''),
+            "in_index": 0,
             "in_script": tx_input.get('scriptSig', {'hex': ''}).get('hex'),
             "address": "",
             "in_val": 0
