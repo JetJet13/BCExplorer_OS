@@ -14,11 +14,8 @@ import psycopg2
 from psycopg2.extras import Json
 import os
 import simplejson as json
-import logging
 from settings import get_settings
 
-
-logger = logging.getLogger('insert')
 
 conf = get_settings()
 
@@ -48,7 +45,7 @@ def set2list (aSet):
 
 
 def display_time(seconds):
-    # logger.info("minutes",seconds
+    # print("minutes",seconds
     answer = []
     result = ""
     intervals = (('year', 525949), ('month', 43829), ('week', 10080), ('day', 1440), ('hour', 60), ('minute', 1))
@@ -60,16 +57,16 @@ def display_time(seconds):
         if modo != 0:
             if modo > 1:
                 # mojo = str(modo)+" "+each[0]+suffix
-                # logger.info(mojo
+                # print(mojo
                 answer.append({"duration": modo, "type": each[0] + suffix})
                 seconds -= interval_sec*rojo
-                logger.info("minutes minus", seconds)
+                print("minutes minus", seconds)
             else:
                 # jojo = str(modo)+" "+each[0]
-                # logger.info(jojo
+                # print(jojo
                 answer.append({"duration": modo, "type": each[0]})
                 seconds -= each[1]
-                # logger.info("minutes minus 1",seconds
+                # print("minutes minus 1",seconds
     r = 0
     for each in answer:
         dur = each["duration"]
@@ -133,6 +130,9 @@ def hexHashReverser(bit):
 
 
 def getBigEndian(hex_val):
+    if not hex_val:
+        print('BigEndian - no hex_val passed')
+        return 0L
     step0 = "0x" + hex_val
     step1 = BitArray(step0)
     step2 = step1.hex
@@ -147,6 +147,8 @@ def getBigEndian(hex_val):
 
 
 def getLitEndian(hex_val):
+    if not hex_val:
+        return 0L
     step0 = "0x" + hex_val
     step1 = BitArray(step0)
     step2 = step1.uintle
@@ -187,6 +189,8 @@ def computeBlockHash(rawHash):
 
 
 def computeTransHash(rawHash):
+    if not rawHash:
+        return ''
     initial_step = "0x" + rawHash
     primary_step = BitArray(initial_step)
     step0 = primary_step.bytes
@@ -362,9 +366,14 @@ def byte_from_file(filename):
             else:
                 break
 
+
 def parse_block(each, x):
     # compute the blockhash to get info from rpc
     bHash = computeBlockHash(each[8:168])
+    cursor.execute("SELECT height FROM blocks WHERE id = %s", (bHash,))
+    if cursor.rowcount > 0:
+        print("block {} at height {} already found".format(bHash, cursor.fetchone()[0]))
+        return
     bInfo = access.getblock(bHash)
     # Lets collect the block details
     bHeight = bInfo["height"]
@@ -386,7 +395,7 @@ def parse_block(each, x):
     bCusto = []
     bTxs = bInfo["tx"]
     bTimeStamp = getLitEndian(each[144:152])  # timestamp in unix time
-    logger.info(bHeight, bCoinageDestroyed)
+    print(bHeight, bCoinageDestroyed)
     # let's get custodians into a list
     for c in range(0, len(bInfo["vote"]["custodians"])):
         custo = bInfo["vote"]["custodians"][c]["address"]
@@ -467,13 +476,16 @@ def parse_block(each, x):
         trans["chain"] = bChain
         trans["coinstake"] = False
         trans["coinagedestroyed"] = 0
-        # logger.info("ver,timestamp", tx_ver, tx_timestamp
+        # print("ver,timestamp", tx_ver, tx_timestamp
         counter += 16
         # ---------------------------INPUT PARSING----------------------------------------
         # let's find input count
         tx_inCount = tx[counter:counter + 2]
         if tx_inCount != "fd":  # < 255 inputs
-            inCount = int(tx_inCount, 16)
+            try:
+                inCount = int(tx_inCount, 16)
+            except ValueError:
+                inCount = 0
             counter += 2
         elif tx_inCount == "fd" and len(access.getrawtransaction(bInfo["tx"][r], 1)[
                                             "vin"]) >= 255:  # > 255 inputs
@@ -486,7 +498,7 @@ def parse_block(each, x):
         trans["inputs"] = []
         trans["in_total"] = 0
         trans["JSONinputs"] = []
-        # logger.info("input count",inCount
+        # print("input count",inCount
         # let's cycle through inputs
         for i in xrange(0, inCount):
             input_num = i
@@ -503,14 +515,15 @@ def parse_block(each, x):
             if input_scriptLen != "fd":  # > 255 bytes
                 scriptLen = int(input_scriptLen, 16) * 2
                 counter += 74
-            elif input_scriptLen == "fd" and len(
-                    access.getrawtransaction(
-                        bInfo["tx"][r], 1
-                    )["vin"][i]["scriptSig"]["hex"]
-            ) >= 506:
-                # 0xfd = 253 in decimal and so 253*2 = 506
-                scriptLen = getLitEndian(tx[counter + 74:counter + 78]) * 2
-                counter += 78
+            elif input_scriptLen == "fd":
+               try: 
+                   d_hex = len(access.getrawtransaction(bInfo["tx"][r], 1)["vin"][i]["scriptSig"]["hex"] )
+               except IndexError:
+                   continue
+               if d_hex >= 506:
+                   # 0xfd = 253 in decimal and so 253*2 = 506
+                   scriptLen = getLitEndian(tx[counter + 74:counter + 78]) * 2
+                   counter += 78
             else:  # input_scriptLen == 'fd'
                 scriptLen = int(input_scriptLen, 16) * 2
                 counter += 74
@@ -530,15 +543,18 @@ def parse_block(each, x):
             }
             trans["inputs"].append(input_details)
             trans["JSONinputs"].append(Json(input_details))
-            # logger.info("input:num,tx,index,script_len,sequence", input_num, input_tx,
+            # print("input:num,tx,index,script_len,sequence", input_num, input_tx,
             # input_index, input_sequence
 
         # --------------------OUTPUT PARSING------------------------------
         # let's get output count
         tx_outCount = tx[counter:counter + 2]
-        # logger.info(tx_outCount
+        # print(tx_outCount
         if tx_outCount != "fd":  # < 255 outputs
-            outCount = int(tx_outCount, 16)
+            try:
+                outCount = int(tx_outCount, 16)
+            except ValueError:
+                outCount = 0
             counter += 2
         elif tx_outCount == "fd" and len(access.getrawtransaction(bInfo["tx"][r], 1)[
                                              "vout"]) >= 255:  # > 255 outputs
@@ -552,7 +568,7 @@ def parse_block(each, x):
         trans["out_total"] = 0
         trans["JSONoutputs"] = []
         trans["out_txs"] = []
-        # logger.info("outCount", outCount
+        # print("outCount", outCount
         # let's cycle through the outputs
         for o in xrange(0, outCount):
             out_num = o
@@ -560,7 +576,7 @@ def parse_block(each, x):
             out_val = tx[counter:counter + 16]
             out_type = tx[counter + 16:counter + 18]
             output_Val = getLitEndian(out_val)
-            # logger.info("out:Val,type",out_val,out_type
+            # print("out:Val,type",out_val,out_type
             capture_details = True
             if out_val == "0000000000000000":
                 out_scriptLen = out_type
@@ -578,12 +594,12 @@ def parse_block(each, x):
                     if out_type == "fd" and len(
                             access.getrawtransaction(bInfo["tx"][r], 1)["vout"][out_num][
                                 "scriptPubKey"]["hex"]) >= 506:
-                        logger.info("OP_RETURN script length is greater than 255 bytes")
+                        print("OP_RETURN script length is greater than 255 bytes")
                         byte_len = tx[counter + 18:counter + 22]
-                        logger.info("out_type", out_type)
-                        logger.info("byte_len", byte_len)
+                        print("out_type", out_type)
+                        print("byte_len", byte_len)
                         OP_length = getLitEndian(byte_len) * 2
-                        logger.info("OP_length", OP_length)
+                        print("OP_length", OP_length)
                         counter += 22
                     else:
                         OP_length = int(out_type, 16) * 2
@@ -599,18 +615,18 @@ def parse_block(each, x):
                     if OP_type == "6a51":
                         OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                         OP = "OP_RETURN OP_1 "
-                        # logger.info("OP_RETURN OP_1", OP_message
+                        # print("OP_RETURN OP_1", OP_message
                     elif OP_type == "6a52":
                         OP_message = tx[counter + 6:counter + 6 + OP_stringLen]
                         OP = "OP_RETURN OP_2 "
-                        # logger.info("OP_RETURN OP_2", OP_message
+                        # print("OP_RETURN OP_2", OP_message
                     address = "NonStandard"
                     hash160 = "None"
                     outScript_decode = OP + OP_message
                     output_type = "NonStandard"
                     counter += OP_length
             else:  # there is some value being received
-                # logger.info(output_Val,"BKC"
+                # print(output_Val,"BKC")
                 if out_type == "19":  # P2PH
                     outScript = tx[counter + 18:counter + 68]
                     outScript_decode = (
@@ -646,18 +662,33 @@ def parse_block(each, x):
                     counter += 152
                 else:
                     print("Unknown address type", out_type)
-                    return
+                    counter += 18
+                    if out_type:
+                        if out_type == 'fd':
+                            script_len = int(tx[counter:counter+6], 16)
+                            counter += 6 + script_len
+                        elif out_type == 'fe':
+                            script_len = int(tx[counter:counter+10], 16)
+                            counter += 10 + script_len
+                        elif out_type == 'ff':
+                            script_len = int(tx[counter:counter+18], 16)
+                            counter += 18 + script_len
+                        else:
+                            script_len = int(out_type, 16)
+                            counter += script_len 
+                        	
+                    
 
             output_details = {
                 "out_num": out_num,
                 "out_val": output_Val,
                 "address": address,
-                "hash160": hash160 if hash160 else '',
+                "hash160": hash160,
                 "script": {
-                    "raw": outScript if outScript else '',
-                    "decode": outScript_decode if outScript_decode else ''
+                    "raw": outScript,
+                    "decode": outScript_decode
                 },
-                "type": output_type if output_type else ''
+                "type": output_type
             }
             trans["out_total"] += output_Val
             trans["outputs"].append(output_details)
@@ -677,7 +708,7 @@ def parse_block(each, x):
         if r == bNumTx - 1:  # the last transaction in the block; it's succeded by a block-end-script
             lockTime = tx[counter:counter + 8]
             if lockTime != "00000000":
-                logger.info(tx[h:counter + 10])
+                print(tx[h:counter + 10])
                 print("Locktime is off!")
                 return
             tx_type = tx[counter + 8:counter + 10]
@@ -686,13 +717,13 @@ def parse_block(each, x):
             endScriptLen_int = int(endScriptLen, 16) * 2
             endScript = tx[counter + 12:counter + 12 + endScriptLen_int]
             counter += 12 + endScriptLen_int
-            # logger.info("locktime,tx_type", lockTime, tx_type)
+            # print("locktime,tx_type", lockTime, tx_type)
         else:  # not the last transaction in the block
             lockTime = tx[counter:counter + 8]
             tx_type = tx[counter + 8:counter + 10]
             counter += 10
             tx_hash = computeTransHash(tx[h:counter])
-            # logger.info("locktime,tx_type", lockTime, tx_type)
+            # print("locktime,tx_type", lockTime, tx_type)
         trans["id"] = tx_hash
         trans["type"] = tx_type
         trans["blockhash"] = bHash
@@ -722,7 +753,10 @@ def parse_block(each, x):
                 address_type = "BKC"
 
             for o in xrange(0, tx_outCount):
-                output_type = trans["outputs"][o]["type"]
+                try:
+                    output_type = trans["outputs"][o]["type"]
+                except IndexError:
+                    continue 
                 if output_type == "pubkey":
                     trans["outputs"][o]["address"] = getAddress(
                         trans["outputs"][o]["address"],
@@ -783,7 +817,10 @@ def parse_block(each, x):
             insert_input_tx = "INSERT INTO input_txs (input_tx, input_index, txhash) VALUES" \
                               " (%s, %s, %s);"
             for i in xrange(0, tx_inCount):
-                n = trans["inputs"][i]
+                try:
+                    n = trans["inputs"][i]
+                except IndexError:
+                    continue
                 if n["in_index"] == -1:
                     n["address"] = "Coinbase"
                     n["in_val"] = 0
@@ -792,18 +829,18 @@ def parse_block(each, x):
                     insert_input_data = (n["in_tx"], n["in_index"], tx_hash,)
                     try:
                         cursor.execute(insert_input_tx, insert_input_data)
-                    except psycopg2.DataError:
-                        print(insert_input_data)
+                    except psycopg2.DataError as e:
+                        print('error saving transaction input: {}'.format(e))
                     postgres.commit()
-                    # logger.info("input tran.",n["in_tx"]
+                    # print("input tran.",n["in_tx"]
                     # now let's find input addresses and amounts
                     input_tx = n["in_tx"]
                     input_index = n["in_index"]
-                    # logger.info(input_tx,input_index
+                    # print(input_tx,input_index
                     d_cursor.execute("SELECT * FROM transactions WHERE id = %s;",
                                      (input_tx,))
                     fetch = d_cursor.fetchone()
-                    # logger.info(fetch
+                    # print(fetch
                     if type(fetch) == None:
                         d_cursor.execute(
                             "SELECT * FROM orphan_transactions WHERE id = %s;",
@@ -825,11 +862,8 @@ def parse_block(each, x):
                                 "UPDATE transactions SET out_txs[%s] = %s WHERE id = %s;",
                                 (input_index + 1, tx_hash, input_tx,)
                             )
-                        except psycopg2.DataError:
-                            print(
-                                "UPDATE transactions SET out_txs[%s] = %s WHERE id = %s;",
-                                (input_index + 1, tx_hash, input_tx,)
-                            )
+                        except psycopg2.DataError as e:
+                            print('error updating transaction: {}'.format(e))
                         postgres.commit()
                     elif tx_chain == 'orphan':
                         cursor.execute(
@@ -874,10 +908,10 @@ def parse_block(each, x):
                                   trans["coinagedestroyed"],)
                 try:
                     cursor.execute(insert_tx, insert_tx_data)
-                except psycopg2.DataError:
-                    print(insert_tx_data)
+                except psycopg2.DataError as e:
+                    print('error saving transaction: {}'.format(e))
                 postgres.commit()
-                logger.info("MAIN - just inserted,", tx_hash)
+                print("MAIN - just inserted,", tx_hash)
             else:
                 cursor.execute("SELECT height FROM orphan_transactions WHERE id = %s;",
                                (tx_hash,))
@@ -903,7 +937,7 @@ def parse_block(each, x):
                     trans["coinagedestroyed"],)
                     cursor.execute(insert_tx, insert_tx_data)
                     postgres.commit()
-                    logger.info("ORPHAN just inserted,", tx_hash)
+                    print("ORPHAN just inserted,", tx_hash)
             if tx_chain == 'main':
                 for x in trans["addresses"]:
                     if address_type == "BKS":
@@ -959,11 +993,11 @@ def parse_block(each, x):
                 block["numTx_bkc"],
                 block["coinagedestroyed"], block["txs"], block["motions"],
                 block["custodians"],)
-            logger.info("inserting %s on chain: %s" % (x, chain))
+            print("inserting %s on chain: %s" % (x, chain))
             try:
                 cursor.execute(insert_block, insert_data)
-            except psycopg2.DataError:
-                print(insert_data)
+            except psycopg2.DataError as e:
+                print('error saving block'.format(e))
             postgres.commit()
     elif chain == "orphan":
         cursor.execute("SELECT height FROM orphan_blocks where id = %s;", (bHash,))
@@ -997,7 +1031,7 @@ def parse_block(each, x):
                 block["numTx_bkc"],
                 block["coinagedestroyed"], block["txs"], block["motions"],
                 block["custodians"],)
-            logger.info("inserting %s on chain: %s" % (x, chain))
+            print("inserting %s on chain: %s" % (x, chain))
             cursor.execute(insert_block, insert_data)
             postgres.commit()
 
@@ -1012,14 +1046,14 @@ def parse_block(each, x):
 
 def main():
     start_time = time.time()
-    logger.info("Current block count: ", access.getblockcount())
+    print("Current block count: ", access.getblockcount())
 
     # Linux Users
     blk01 = "/home/bcex/.bcexchange/blk0001.dat"
     blk02 = "/home/bcex/.bcexchange/blk0002.dat"
     blk = ""
 
-    start_height = 100000
+    start_height = 0
     
     #  Windows Users
     # blk01 = "C:/users/home/appdata/roaming/bcexchange/blk0001.dat"
@@ -1055,7 +1089,7 @@ def main():
 
     
     elapsed_time = time.time() - start_time
-    logger.info("%s seconds for complete blockchain Parse" % elapsed_time)
+    print("%s seconds for complete blockchain Parse" % elapsed_time)
     
     getInfo = access.getinfo()
     
@@ -1064,7 +1098,7 @@ def main():
                     "moneysupply":getInfo["moneysupply"],
                     "connections":getInfo["connections"]
     }
-    logger.info(networkInfo)
+    print(networkInfo)
     
     # insert the network info into database
     # insert_network_info = "INSERT INTO networkinfo (id, height, moneysupply, connections) VALUES (%s, %s, %s, %s);"
@@ -1091,10 +1125,10 @@ def main():
     
     vote_start = vote_tracker_start
     vote_end = vote_tracker_end
-    logger.info("vote_start",vote_start,"vote-end",vote_end)
+    print("vote_start",vote_start,"vote-end",vote_end)
     # custodians
     for x in xrange(vote_start,vote_end):
-        logger.info(vote_end - x,"Custodian more to go")
+        print(vote_end - x,"Custodian more to go")
         getCustodians = access.getcustodianvotes(x)
         for m in getCustodians:
             address = m
@@ -1130,7 +1164,7 @@ def main():
                             d_cursor.execute("SELECT latest_block,numvotes,passed FROM custodians WHERE id = %s;", (id, ))
                             get_prev_info = d_cursor.fetchone()
                             if latest_block > get_prev_info["latest_block"] and numvotes != get_prev_info["numvotes"] and get_prev_info["passed"] == False:
-                                logger.info("updating!")
+                                print("updating!")
                                 if numvotes > get_prev_info["numvotes"]:
                                     cursor.execute("UPDATE custodians SET latest_block = %s, numvotes = %s, sdd = %s \
                                                                        WHERE id = %s;",
@@ -1164,7 +1198,7 @@ def main():
     
     # motions
     for x in xrange(vote_start,vote_end):
-        logger.info(vote_end - x,"Motion more to go")
+        print(vote_end - x,"Motion more to go")
         getMotions = access.getmotions(x)
         for m in getMotions:
             id = m
@@ -1195,10 +1229,10 @@ def main():
                     # let's check if the latest_block is ahead of previous latest_block
                     d_cursor.execute("SELECT latest_block,numvotes,passed FROM motions WHERE id = %s;", (id, ))
                     get_prev_info = d_cursor.fetchone()
-                    logger.info(latest_block,">",get_prev_info["latest_block"])
-                    logger.info(numvotes,">",get_prev_info["numvotes"])
+                    print(latest_block,">",get_prev_info["latest_block"])
+                    print(numvotes,">",get_prev_info["numvotes"])
                     if latest_block > get_prev_info["latest_block"] and numvotes != get_prev_info["numvotes"] and get_prev_info["passed"] == False:
-                        logger.info("updating!")
+                        print("updating!")
                         if numvotes > get_prev_info["numvotes"]:
                             cursor.execute("UPDATE motions SET latest_block = %s, numvotes = %s, sdd = %s \
                                                            WHERE id = %s;",
@@ -1221,11 +1255,11 @@ def main():
         d_cursor.execute("SELECT totalvotes FROM motions WHERE id = %s;", (t, ))
         get_prev_info = d_cursor.fetchone()
         if total_votes > get_prev_info["totalvotes"]:
-            logger.info("updating totalvotes!")
+            print("updating totalvotes!")
             cursor.execute("UPDATE motions SET totalvotes = %s WHERE id = %s;", (total_votes,t, ))
             postgres.commit()
     
-    logger.info("Done")
+    print("Done")
     
     
 if __name__ == '__main__':
