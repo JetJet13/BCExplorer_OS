@@ -460,7 +460,7 @@ def parse_block(each, x):
 
     tx_index = 0
     for tx in block['txs']:
-        parse_transaction(tx, tx_index, block)
+        block = parse_transaction(tx, tx_index, block)
         tx_index += 1
 
     # save the block
@@ -819,6 +819,8 @@ def parse_transaction(tx, tx_index, block):
         )
         cursor.execute(insert_hash, insert_hash_data)
         postgres.commit()
+
+    return block
 
 
 def main():
