@@ -46,6 +46,7 @@ def CreateTablesAndTriggers(cursor, postgres):
       nonce bigint,
       merkleroot text,
       prevhash text,
+      nexthash text,
       type text,
       chain text,
       numtx bigint,
@@ -154,6 +155,7 @@ def CreateTablesAndTriggers(cursor, postgres):
       nonce bigint,
       merkleroot text,
       prevhash text,
+      nexthash text,
       type text,
       chain text,
       numtx bigint,
@@ -345,7 +347,7 @@ def main():
 
     access = AuthServiceProxy("http://{}:{}@127.0.0.1:2240".format(
         conf['daemon_rpc']['username'],
-        conf['damone_rpc']['password']
+        conf['daemon_rpc']['password']
     ))
     postgres = psycopg2.connect(
         database=conf['database']['database_name'],

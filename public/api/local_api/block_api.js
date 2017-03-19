@@ -132,13 +132,13 @@ var howMany = req.params.id;
     else{ // route params are clean
         howMany = parseInt(howMany);
 
-        var query = client.query("SELECT COUNT(*) FROM blocks", function(errH, resultH) {
+        var query = client.query("SELECT MAX(height) FROM blocks", function(errH, resultH) {
              if (errH){
                  console.log(errH);
                  return res.status(400).send("Uh-oh. Unsuccessful query block_latest by networkinfo");
              }
              else{
-                 var height = resultH.rows[0].count - howMany;
+                 var height = resultH.rows[0].max - howMany;
                  var getBlocks = client.query("SELECT height, timestamp, size, numtx, solvedby, tx_received_bks, tx_received_bkc FROM blocks WHERE height >= $1 ORDER BY height ASC",[height],function(errB,resultB){
 
                      if (errB){
