@@ -166,7 +166,7 @@ specifically
 Open up these files and replace 
 
 #### Setting Up Credentials
-Open the settings.yaml file and fill in the details.  
+Open the settings.yaml file and fill in the details. This file will be used by all the files in `pyScripts` for connection to `RPC` and `Postgres`  
 
 ```angular2html
 daemon_rpc:
@@ -222,7 +222,9 @@ Make sure that the B&C Exchange Client is running before you start the script
 ```
 #### Linux Users
 ```Bash
-$ /usr/bin/python /{folder-location}/BCExplorer_OS/pyScripts/PostgresSetup.py
+$ sudo -u bcex -i
+$ cd BCExplorer_OS
+$ ve/bin/python pyScripts/PostgresSetup.py
 ```
 Once complete, you are ready to start inserting data into the database
 
@@ -260,9 +262,9 @@ The explorer will still work fine, but if you want to fix it, visit	[this post](
 *If there are any other errors in which you cannot fix, raise an issue in this repo and I'll try my best to help you.*
 #### Linux Users
 We will set up `supervisor` to manage the processes that need to run for the exchange.  
-We will also set up `Nginx` to act as a reverse proxy and manage the web requests.
-These need to be installed and run by a user with `sudo` capabilities.
-The instructions below are for Debian based systems (Ubuntu, Mint etc.). on other systems the package names and file paths may differ.  
+We will also set up `Nginx` to act as a reverse proxy and manage the web requests.  
+These need to be installed and run by a user with `sudo` capabilities.  
+The instructions below are for Debian based systems (Ubuntu, Mint etc.), on other systems the package names and file paths may differ.  
 The supplied config files will work for the setup with the `bcex` user as described above.  
 If you have used a different username or installed code to different paths, you will need to alter the conf files accordingly.  
   
