@@ -1,12 +1,12 @@
 #!/bin/bash
 while [ true ]; do
-  if ps aux | grep "[.]/BCparserv02.py" > /dev/null
+  if ps aux | grep "[.]/BC_parser.py" > /dev/null
   then
-    echo "BCparserv02 is running"
+    echo "BC_parser is running"
   else
-    echo "BCparserv02 is not running"
+    echo "BC_parser is not running"
     echo "Starting it up...."
-    /usr/bin/python ./pyScripts/BCparserv02.py
+    /home/bcex/BCExplorer_OS/ve/bin/python ./pyScripts/BC_parser.py
   fi
   echo "sleeping"
   sleep 30

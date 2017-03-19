@@ -11,7 +11,7 @@ app.set('port', process.env.PORT || 443);
 
 
 var http_server = http.createServer(app);
-http_server.listen(80);
+http_server.listen(8080);
 
 
 var webSocket = new ws({server: http_server});

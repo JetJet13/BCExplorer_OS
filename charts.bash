@@ -6,7 +6,7 @@ while [ true ]; do
   else
     echo "BC_charts is not running"
     echo "Starting it up...."
-    /usr/bin/python ./pyScripts/BC_charts.py
+    /home/bcex/BCExplorer_OS/ve/bin/python ./pyScripts/BC_charts.py
   fi
   echo "sleeping"
   sleep 86400

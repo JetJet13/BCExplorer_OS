@@ -1,0 +1,10 @@
+---
+
+daemon_rpc:
+  username:
+  password:
+
+database:
+  database_name:
+  username:
+  password:
