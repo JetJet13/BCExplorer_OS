@@ -272,7 +272,7 @@ First you need to install both applications.
 ```bash
 $ sudo apt-get install nginx supervisor
 ```
-#####Supervisor
+#####Supervisor  
 Copy the conf files found in `<this repo>/confs/supervisor` to `/etc/supervisor/conf.d`.  
 Then run
 ```bash
@@ -296,7 +296,7 @@ and ensure that there are no reported errors. If everything is reported successf
 ```bash
 $ sudo service nginx restart
 ```
-#####Firewall
+#####Firewall  
 To add a bit more protection to the server you can set up some simple firewall rules.
 ```bash
 $ sudo apt-get install ufw
