@@ -272,7 +272,7 @@ First you need to install both applications.
 ```bash
 $ sudo apt-get install nginx supervisor
 ```
-#####Supervisor  
+##### Supervisor  
 Copy the conf files found in `<this repo>/confs/supervisor` to `/etc/supervisor/conf.d`.  
 Then run
 ```bash
@@ -285,7 +285,7 @@ You can check on the status with the following command:
 $ sudo supervisorctl status
 ```
 This will show you the current state of the managed program. Log files created by the managed programs will be saved to the `bcex` users home directory as defined in the conf files.  
-#####Nginx  
+##### Nginx  
 Open the `<this_repo>/confs/nginx/explorer.conf` file and replace `<server_name>` with the domain name you will use to reach the block explorer.  
 Copy that file to `/etc/nginx/conf.d/explorer.conf`.  
 Run 
@@ -296,7 +296,7 @@ and ensure that there are no reported errors. If everything is reported successf
 ```bash
 $ sudo service nginx restart
 ```
-#####Firewall  
+##### Firewall  
 To add a bit more protection to the server you can set up some simple firewall rules.
 ```bash
 $ sudo apt-get install ufw
