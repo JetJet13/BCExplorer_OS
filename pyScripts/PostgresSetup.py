@@ -155,6 +155,7 @@ def CreateTablesAndTriggers(cursor, postgres):
       nonce bigint,
       merkleroot text,
       prevhash text,
+      nexthash text,
       type text,
       chain text,
       numtx bigint,

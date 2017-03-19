@@ -31,10 +31,19 @@ Defined in `requirements.txt`
 
 ## Setup
 Before you start with the setup, make sure you have installed all the required tools 
-(B&C Exchange Client, Python, NPM, NodeJS, PostgreSQL, Sass, Grunt) 
-and the python dependencies mentioned above.
+(B&C Exchange Client, Python, NPM, NodeJS, PostgreSQL, Sass, Grunt, Virtualenv) 
 
-Let's start by cloning and compiling this repo.
+On Linux systems it is advised to run the software as a non-root user.  
+Create a new user with the `sudo adduser bcex` command and answering the questions.  
+(`bcex` is specified as a user name here as that is used in config files later in these instructions.  
+If you want to use a different user name, you will need to change some file paths later on to reflect the change)
+  
+Once you have your user created you can switch to that user with  
+```Bash
+$ sudo -u bcex -i
+```
+
+Next step is to clone and compile this repo.
 ```Bash
 git clone https://github.com/JetJet13/BCExplorer_OS.git
 cd ./BCExplorer_OS
@@ -97,13 +106,16 @@ After you have installed PostgreSQL (>=9.4) the first thing we are going to do i
 
 ### Python Setup
 #### Linux Users
-First thing is to create a virtualenv in the root of the BCExplorer_OS directory.  
-```
+We will install Python dependencies to a virtualenv in the root of the BCExplorer_OS directory.  
+Run the following commands as the `bcex` user
+```Bash
 $ cd BCExplorer_OS  
 $ virtualenv ve
-```  
-
-
+```    
+Then you can install the python dependencies into the virtualenv  
+```Bash
+$ ve/bin/pip install -r requirements.txt
+```
 
 #### Windows Users
 Instructions to follow
@@ -127,10 +139,8 @@ server=1
   `bcexchange.exe` or `bcexchanged.exe`  
 #### Linux Users
 ```Bash
-# root user
-$ cd /root/.bcexchange
 # non-root user
-$ cd /home/{username}/.bcexchange/
+$ cd /home/bcex/.bcexchange/
 # then
 $ sudo pico bcexchange.conf
 ```
@@ -143,19 +153,7 @@ server=1
 ```
 Set `rpcuser` and `rpcpassword` to whatever you like and then save and exit.<br/>
 
-Now, we want to start up the client,
-```Bash
-$ cd /{client-folder-location}/bin/64
-$ sudo ./bcexchanged --daemon
-B&C Exchange server starting
-```
-If you get some kind of error, go back and check if your `bcexchange.conf` file is similar to what is above.
-
 ---
-The client/daemon is now going to start syncing with the rest of the network. This will take a while so feel free to take
-a break at this point.
-
-**_Important: I recommend waiting for the B&C Exchange Client to fully sync before continuing_**
 
 ### Edit Source Files
 
@@ -164,6 +162,8 @@ specifically
 
 1. bin/www
 2. public/api/api_tools.js
+
+Open up these files and replace 
 
 #### Setting Up Credentials
 Open the settings.yaml file and fill in the details.  
@@ -179,8 +179,10 @@ database:
   password: <ENTER_DATABASE_PASSWORD>
 ```
 
+---
+
 #### Setting Up File Paths
-======
+
 Next open `/pyScripts/BC_parser.py` and `/pyScripts/BC_insert.py` and make the following changes
 #### Windows Users
 First you have to comment out or delete lines. <br/>
@@ -233,8 +235,9 @@ Make sure that the B&C Exchange Client is running before you start the script
 > python /{folder-location}/BCExplorer_OS/pyScripts/BC_insert.py
 ```
 #### Linux Users
+Run this as the `bcex` user and from the `/home/bcex/BCExplorer_OS` directory
 ```Bash
-$ /usr/bin/python /{folder-location}/BCExplorer_OS/pyScripts/BC_insert.py
+$ ve/bin/python pyScripts/BC_insert.py
 ```
 
 ### Launching Explorer
@@ -243,11 +246,6 @@ Only launch the explorer if you have inserted data into the database. Otherwise 
 ```Powershell
 > cd /{folder-location}/BCExplorer_OS
 > grunt server
-```
-#### Linux Users
-```Bash
-$ cd /{folder-location}/BCExplorer_OS
-$ sudo grunt server
 ```
 Visit `localhost:80` to view the application. 
 
@@ -260,33 +258,52 @@ DEPRECATION WARNING:
 The explorer will still work fine, but if you want to fix it, visit	[this post](https://community.c9.io/t/how-to-upgrade-ruby/1355)<br/>
 
 *If there are any other errors in which you cannot fix, raise an issue in this repo and I'll try my best to help you.*
-
-### Inserting All Data
-In the **Inserting Data** section, the script `BC_insert.py` only inserted a small amount of data. You will need to insert
-the rest of the blocks into the database for a complete and up-to-date block explorer.
-
-This is done by running `BC_insert.py` and making adjustments to line `358`
-```Python
-fi.seek(100000,0)
+#### Linux Users
+We will set up `supervisor` to manage the processes that need to run for the exchange.  
+We will also set up `Nginx` to act as a reverse proxy and manage the web requests.
+These need to be installed and run by a user with `sudo` capabilities.
+The instructions below are for Debian based systems (Ubuntu, Mint etc.). on other systems the package names and file paths may differ.  
+The supplied config files will work for the setup with the `bcex` user as described above.  
+If you have used a different username or installed code to different paths, you will need to alter the conf files accordingly.  
+  
+First you need to install both applications. 
+```bash
+$ sudo apt-get install nginx supervisor
 ```
-This will only read the first 100,000 bytes of the `blk0001.dat` file. You will have to make adjustments to the values as you process/insert
-the blocks.
-
-**NOTE** `BC_insert.py` makes RPC calls to the B&C Exchange Client, so it needs to be running while the script is running.
-
-Once you have inserted all the blocks and transactions into the database, you can run the bash scripts
-#### Linux Users Only
-```Bash
-runparser.bash 
-charts.bash
+#####Supervisor
+Copy the conf files found in `<this repo>/confs/supervisor` to `/etc/supervisor/conf.d`.  
+Then run
+```bash
+$ sudo service supervisor start
+$ sudo supervisorctl update
 ```
-to continuously insert blocks and other data
-```Bash
-$ sudo /{folder-location}/BCExplorer_OS/runparser.bash
-# AND
-$ sudo /{folder-location}/BCExplorer_OS/charts.bash
+This will start the supervisor manage and the managed programs defined in the conf files.  
+You can check on the status with the following command:  
+```bash
+$ sudo supervisorctl status
 ```
-I recommend using `tmux` when you do this.
+This will show you the current state of the managed program. Log files created by the managed programs will be saved to the `bcex` users home directory as defined in the conf files.  
+#####Nginx  
+Open the `<this_repo>/confs/nginx/explorer.conf` file and replace `<server_name>` with the domain name you will use to reach the block explorer.  
+Copy that file to `/etc/nginx/conf.d/explorer.conf`.  
+Run 
+```bash
+$ sudo nginx -t
+```
+and ensure that there are no reported errors. If everything is reported successfully, restart nginx with
+```bash
+$ sudo service nginx restart
+```
+#####Firewall
+To add a bit more protection to the server you can set up some simple firewall rules.
+```bash
+$ sudo apt-get install ufw
+$ sudo ufw allow ssh
+$ sudo ufw allow http
+$ sudo ufw enable
+```
+
+You should now be able to reach the block explorer on your domain. I would recommend enabling SSL and obtaining a certificate through LetsEncrypt but that is beyond the scope of this README.
 
 ## Final Remarks
 Setup requires you to work in the order in which the sections are layed out. 
